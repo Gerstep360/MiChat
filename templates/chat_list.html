@@ -1,0 +1,83 @@
+<!-- chat_list.html -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Mi Chat - Inicio</title>
+    <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body>
+    <div class="main-container">
+        <!-- Panel de chats (lado izquierdo) -->
+        <div class="chat-list-panel">
+            <div class="chat-list-header">
+                <img src="{{ profile_picture }}" alt="Mi Perfil" id="my-profile-picture" class="profile-picture" onclick="openProfileModal()">
+                <h2>Mis Chats</h2>
+                <button onclick="openNewChatModal()" class="new-chat-button">+</button>
+            </div>
+            <input type="text" id="search-input" placeholder="Buscar chats..." onkeyup="searchChats()">
+            <div id="chat-list">
+                <!-- Lista de chats se carga aquí -->
+            </div>
+        </div>
+
+        <!-- Ventana de chat (lado derecho) -->
+        <div class="chat-window-panel">
+            <!-- Mostrar mensaje de bienvenida si no hay ningún chat seleccionado -->
+            <div id="welcome-message" class="welcome-message">
+                <h1>Bienvenido a MiChat</h1>
+                <p>Selecciona un chat para comenzar a chatear.</p>
+            </div>
+            <!-- Ventana de chat se carga aquí cuando se selecciona un chat -->
+            <div id="chat-window" class="chat-window" style="display: none;">
+                <div class="chat-header">
+                    <img id="chat-user-image" src="/static/img/default_profile.png" alt="Usuario" class="profile-picture" onclick="openChatUserProfileModal()">
+                    <div>
+                        <h2 id="chat-with">Chat con Usuario</h2>
+                        <p id="chat-user-status">En línea</p>
+                    </div>
+                </div>
+                <div id="chat-messages" class="chat-messages">
+                    <!-- Mensajes se cargan aquí -->
+                </div>
+                <form id="message-form" class="message-form">
+                    <input type="text" id="message-input" placeholder="Escribe un mensaje..." required autocomplete="off">
+                    <button type="submit" class="send-button">&#9658;</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para nuevo chat -->
+    <div id="new-chat-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeNewChatModal()">&times;</span>
+            <h2>Iniciar Nuevo Chat</h2>
+            <input type="text" id="search-users-input" placeholder="Buscar usuarios..." onkeyup="searchUsers()">
+            <div id="user-list">
+                <!-- Lista de usuarios se carga aquí -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para ver la foto de perfil propia -->
+    <div id="profile-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeProfileModal()">&times;</span>
+            <img id="profile-modal-image" src="{{ profile_picture }}" alt="Mi Perfil" class="profile-modal-image">
+        </div>
+    </div>
+
+    <!-- Modal para ver la foto de perfil del usuario del chat -->
+    <div id="chat-user-profile-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeChatUserProfileModal()">&times;</span>
+            <img id="chat-user-modal-image" src="/static/img/default_profile.png" alt="Perfil del Usuario" class="profile-modal-image">
+        </div>
+    </div>
+
+    <!-- Incluir la librería de Socket.IO y el script principal -->
+    <script src="//cdnjs.cloudflare.com/ajax/libs/socket.io/4.3.2/socket.io.min.js"></script>
+    <script src="/static/js/menu_chat.js"></script>
+</body>
+</html>
