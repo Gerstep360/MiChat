@@ -11,12 +11,22 @@ import string
 from datetime import datetime
 from database import get_db_connection, init_db
 from email_verification import send_verification_email
-
+from dotenv import load_dotenv
 import sqlite3
+# Cargar las variables de entorno desde el archivo .env
+load_dotenv()
+
+# Crear la aplicación Flask
 app = Flask(__name__, static_folder='static', template_folder='templates')
-app.secret_key = os.urandom(24)  # Genera una clave secreta aleatoria
+
+# Configurar la clave secreta desde las variables de entorno
+app.secret_key = os.getenv('SECRET_KEY')
+
+# Configurar las sesiones
 app.config['SESSION_TYPE'] = 'filesystem'
 Session(app)
+
+# Inicializar SocketIO
 socketio = SocketIO(app, manage_session=False)
 
 # Configuración de subida de archivos

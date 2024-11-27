@@ -3,10 +3,15 @@
 import smtplib
 import ssl
 from email.message import EmailMessage
+import os
+from dotenv import load_dotenv
+
+# Cargar las variables de entorno desde el archivo .env
+load_dotenv()
 
 def send_verification_email(receiver_email, verification_code):
-    sender_email = 'gersoft.official@gmail.com'
-    password = 'hckn zfaq fgez jyoe'
+    sender_email = os.getenv('EMAIL_USER')
+    password = os.getenv('EMAIL_PASSWORD')
 
     message = EmailMessage()
     message.set_content(f'Tu código de verificación es: {verification_code}')

@@ -35,10 +35,6 @@ def init_db():
     if 'last_seen' not in columns:
         cursor.execute('ALTER TABLE users ADD COLUMN last_seen DATETIME;')
     
-    # Agregar 'public_key' si no existe
-    if 'public_key' not in columns:
-        cursor.execute('ALTER TABLE users ADD COLUMN public_key TEXT;')
-    
     # Crear tabla de chats
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS chats (
