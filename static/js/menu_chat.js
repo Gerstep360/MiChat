@@ -437,3 +437,82 @@ function closeChatUserProfileModal() {
 
 // Ejecutar la inicialización al cargar la página
 window.onload = initializeApp;
+function toggleSettingsMenu() {
+    const settingsMenu = document.getElementById('settings-menu');
+    if (settingsMenu.style.display === 'block') {
+        settingsMenu.style.display = 'none';
+    } else {
+        settingsMenu.style.display = 'block';
+    }
+}
+
+// Cerrar el menú si el usuario hace clic fuera de él
+window.onclick = function(event) {
+    if (!event.target.matches('.settings-button')) {
+        const settingsMenu = document.getElementById('settings-menu');
+        if (settingsMenu && settingsMenu.style.display === 'block') {
+            settingsMenu.style.display = 'none';
+        }
+    }
+}
+
+function logout() {
+    fetch('/logout', {
+        method: 'GET'
+    }).then(response => {
+        if (response.redirected) {
+            window.location.href = response.url;
+        }
+    });
+}
+
+function deleteProfilePicture() {
+    fetch('/delete_profile_picture', {
+        method: 'POST'
+    }).then(response => response.json())
+      .then(data => {
+          if (data.status === 'success') {
+              const timestamp = new Date().getTime();
+              document.getElementById('my-profile-picture').src = data.profile_picture + '?t=' + timestamp;
+              document.getElementById('profile-modal-image').src = data.profile_picture + '?t=' + timestamp;
+          } else {
+              alert('Error al eliminar la foto de perfil.');
+          }
+      });
+}
+
+function changeProfilePicture() {
+    // Crear un input de tipo file oculto
+    const inputFile = document.createElement('input');
+    inputFile.type = 'file';
+    inputFile.accept = 'image/*';
+    inputFile.onchange = function() {
+        const file = inputFile.files[0];
+        if (file) {
+            // Validar el tamaño del archivo (opcional)
+            const maxSize = 5 * 1024 * 1024; // 5 MB
+            if (file.size > maxSize) {
+                alert('El archivo es demasiado grande. Tamaño máximo: 5 MB.');
+                return;
+            }
+            // Enviar el archivo al servidor para actualizar la foto de perfil
+            const formData = new FormData();
+            formData.append('profile_picture', file);
+            fetch('/change_profile_picture', {
+                method: 'POST',
+                body: formData
+            }).then(response => response.json())
+              .then(data => {
+                  if (data.status === 'success') {
+                      const timestamp = new Date().getTime();
+                      document.getElementById('my-profile-picture').src = data.profile_picture + '?t=' + timestamp;
+                      document.getElementById('profile-modal-image').src = data.profile_picture + '?t=' + timestamp;
+                  } else {
+                      alert('Error al cambiar la foto de perfil.');
+                  }
+              });
+        }
+    };
+    // Simular clic en el input file
+    inputFile.click();
+}

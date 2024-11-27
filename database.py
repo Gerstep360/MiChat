@@ -1,4 +1,4 @@
-# database.py
+# database.py 
 
 import sqlite3
 
@@ -10,6 +10,7 @@ def get_db_connection():
 def init_db():
     conn = get_db_connection()
     cursor = conn.cursor()
+    
     # Crear tabla de usuarios
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS users (
@@ -25,12 +26,19 @@ def init_db():
             -- No incluimos last_seen aquí
         )
     ''')
-    # Verificar si la columna last_seen existe
+    
+    # Verificar si las columnas 'last_seen' y 'public_key' existen
     cursor.execute("PRAGMA table_info(users);")
     columns = [column[1] for column in cursor.fetchall()]
+    
+    # Agregar 'last_seen' si no existe
     if 'last_seen' not in columns:
         cursor.execute('ALTER TABLE users ADD COLUMN last_seen DATETIME;')
-    # ... Resto de la función ...
+    
+    # Agregar 'public_key' si no existe
+    if 'public_key' not in columns:
+        cursor.execute('ALTER TABLE users ADD COLUMN public_key TEXT;')
+    
     # Crear tabla de chats
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS chats (
@@ -41,6 +49,7 @@ def init_db():
             FOREIGN KEY(user2_id) REFERENCES users(id)
         )
     ''')
+    
     # Crear tabla de mensajes
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS messages (
@@ -49,11 +58,13 @@ def init_db():
             sender_id INTEGER,
             recipient_id INTEGER,
             content TEXT,
+            nonce TEXT,  -- Para almacenar el nonce utilizado en el cifrado
             timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY(chat_id) REFERENCES chats(chat_id),
             FOREIGN KEY(sender_id) REFERENCES users(id),
             FOREIGN KEY(recipient_id) REFERENCES users(id)
         )
     ''')
+    
     conn.commit()
     conn.close()

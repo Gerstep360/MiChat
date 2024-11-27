@@ -51,9 +51,15 @@ def register_user():
     password = request.form['password']
 
     # Manejar imagen de perfil
+    # Manejar imagen de perfil
     file = request.files.get('profile_picture')
     if file and allowed_file(file.filename):
-        filename = secure_filename(file.filename)
+        # Renombrar el archivo al nombre completo del usuario
+        # Asegurarse de que el nombre es seguro para usar en un sistema de archivos
+        safe_username = secure_filename(username)
+        # Obtener la extensión del archivo
+        extension = file.filename.rsplit('.', 1)[1].lower()
+        filename = f"{safe_username}.{extension}"
         profile_picture_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
         
         # Crear el directorio si no existe
@@ -64,7 +70,7 @@ def register_user():
         # Guardar la ruta relativa para usar en la aplicación
         profile_picture_url = '/' + profile_picture_path.replace('\\', '/')
     else:
-        profile_picture_url = '/static/img/default_profile.png'
+        profile_picture_url = '/static/img/none.jpg'
 
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -138,9 +144,79 @@ def login_user():
         return jsonify({'status': 'Login exitoso.'}), 200
     else:
         return jsonify({'error': 'Credenciales incorrectas.'}), 400
+@app.route('/change_profile_picture', methods=['POST'])
+def change_profile_picture():
+    if 'user_id' not in session:
+        return jsonify({'error': 'No autenticado'}), 401
+    user_id = session['user_id']
+    file = request.files.get('profile_picture')
+    if file and allowed_file(file.filename):
+        # Obtener el nombre completo del usuario
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('SELECT username, profile_picture FROM users WHERE id = ?', (user_id,))
+        user = cursor.fetchone()
+        if not user:
+            conn.close()
+            return jsonify({'error': 'Usuario no encontrado.'}), 404
+        old_profile_picture = user['profile_picture']
+
+        # Eliminar la foto de perfil anterior si no es la predeterminada
+        if old_profile_picture and old_profile_picture != '/static/img/none.jpg':
+            old_picture_path = old_profile_picture.lstrip('/')
+            if os.path.exists(old_picture_path):
+                os.remove(old_picture_path)
+
+        # Renombrar el archivo al nombre completo del usuario
+        safe_username = secure_filename(user['username'])
+        extension = file.filename.rsplit('.', 1)[1].lower()
+        filename = f"{safe_username}.{extension}"
+        profile_picture_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        
+        # Guardar el nuevo archivo
+        file.save(profile_picture_path)
+        profile_picture_url = '/' + profile_picture_path.replace('\\', '/')
+
+        # Actualizar la base de datos
+        cursor.execute('UPDATE users SET profile_picture = ? WHERE id = ?', (profile_picture_url, user_id))
+        conn.commit()
+        conn.close()
+
+        return jsonify({'status': 'success', 'profile_picture': profile_picture_url}), 200
+    else:
+        return jsonify({'error': 'No se proporcionó una imagen válida.'}), 400
+    
+# server.py
+
+@app.route('/delete_profile_picture', methods=['POST'])
+def delete_profile_picture():
+    if 'user_id' not in session:
+        return jsonify({'error': 'No autenticado'}), 401
+    user_id = session['user_id']
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute('SELECT profile_picture FROM users WHERE id = ?', (user_id,))
+    user = cursor.fetchone()
+    if not user:
+        conn.close()
+        return jsonify({'error': 'Usuario no encontrado.'}), 404
+    profile_picture = user['profile_picture']
+
+    # Eliminar la foto de perfil si no es la predeterminada
+    if profile_picture and profile_picture != '/static/img/none.jpg':
+        picture_path = profile_picture.lstrip('/')
+        if os.path.exists(picture_path):
+            os.remove(picture_path)
+    
+    # Actualizar la base de datos para usar la imagen predeterminada
+    cursor.execute('UPDATE users SET profile_picture = ? WHERE id = ?', ('/static/img/none.jpg', user_id))
+    conn.commit()
+    conn.close()
+    return jsonify({'status': 'success', 'profile_picture': '/static/img/none.jpg'}), 200
 
 # Ruta para cerrar sesión
-@app.route('/logout')
+@app.route('/logout', methods=['GET'])
 def logout():
     session.clear()
     return redirect(url_for('login_page'))

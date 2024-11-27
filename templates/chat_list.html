@@ -13,7 +13,17 @@
             <div class="chat-list-header">
                 <img src="{{ profile_picture }}" alt="Mi Perfil" id="my-profile-picture" class="profile-picture" onclick="openProfileModal()">
                 <h2>Mis Chats</h2>
-                <button onclick="openNewChatModal()" class="new-chat-button">+</button>
+                <div class="header-buttons">
+                    <button onclick="openNewChatModal()" class="new-chat-button">+</button>
+                    <!-- Botón de Configuración y Menú Desplegable -->
+                    <div class="settings-dropdown">
+                        <button onclick="toggleSettingsMenu()" class="icon-button settings-button">&#9881;</button>
+                            <div id="settings-menu" class="settings-menu">
+                             <button class="settings-menu-item" onclick="logout()">Cerrar Sesión</button>
+                             </div>
+                    </div>
+
+                </div>
             </div>
             <input type="text" id="search-input" placeholder="Buscar chats..." onkeyup="searchChats()">
             <div id="chat-list">
@@ -61,12 +71,14 @@
     </div>
 
     <!-- Modal para ver la foto de perfil propia -->
-    <div id="profile-modal" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="closeProfileModal()">&times;</span>
-            <img id="profile-modal-image" src="{{ profile_picture }}" alt="Mi Perfil" class="profile-modal-image">
-        </div>
+<div id="profile-modal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeProfileModal()">&times;</span>
+        <img id="profile-modal-image" src="{{ profile_picture }}" alt="Mi Perfil" class="profile-modal-image">
+        <button class="button profile-modal-button" onclick="deleteProfilePicture()">Eliminar foto de perfil</button>
+        <button class="button profile-modal-button" onclick="changeProfilePicture()">Cambiar foto de perfil</button>
     </div>
+</div>
 
     <!-- Modal para ver la foto de perfil del usuario del chat -->
     <div id="chat-user-profile-modal" class="modal">
