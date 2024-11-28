@@ -206,8 +206,7 @@ Este script genera usuarios ficticios para pruebas en la base de datos, con dato
 
 ### **resetear_datos.py**
 Permite limpiar el entorno de desarrollo eliminando:
-- Archivos temporales (`flask_session`, `__pycache__`, etc.).
-- La base de datos.
+- Archivos temporales (`flask_session`, `__pycache__`, `imagenes de usuarios`,etc.).
 - El archivo `usuarios.txt`.
 
 También incluye la función `vaciar_base_de_datos()` para eliminar los datos de todas las tablas de la base de datos sin borrar el archivo.
