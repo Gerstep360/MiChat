@@ -98,7 +98,7 @@ SECRET_KEY=tu_secret_key_api
 Si no tienes una clave secreta para Flask, usa el script `secret.py` para generarla automáticamente:
 
 ```bash
-python -c "import os; print(os.urandom(24).hex())"
+python secret.py
 ```
 
 Pega la clave generada en el archivo `.env` como `SECRET_KEY`.
