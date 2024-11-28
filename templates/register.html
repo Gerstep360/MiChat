@@ -1,10 +1,9 @@
-<!-- templates/register.html -->
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <title>Registro - MiChat</title>
-    <link rel="stylesheet" href="/static/css/styles.css">
+    <link rel="stylesheet" href="/static/css/register.css">
 </head>
 <body>
     <div class="container fade-in">
@@ -20,7 +19,7 @@
             <!-- Input de archivo oculto -->
             <input type="file" id="profile_picture" name="profile_picture" accept="image/*" style="display: none;">
             <!-- Botón personalizado -->
-            <button type="button" class="button" onclick="document.getElementById('profile_picture').click();">Subir Imagen</button>
+            <button type="button" class="button-upload" onclick="document.getElementById('profile_picture').click();">Subir Imagen</button>
             <!-- Mostrar el nombre del archivo seleccionado -->
             <span id="file-name" class="file-name">Ningún archivo seleccionado</span>
 

@@ -13,9 +13,10 @@ Bienvenido a **MiChat**, una aplicación de chat desarrollada con Flask que impl
 4. [Configuración](#configuración)
 5. [Uso](#uso)
 6. [Estructura del Proyecto](#estructura-del-proyecto)
-7. [Implementación de E2EE](#implementación-de-e2ee)
-8. [Contribuciones](#contribuciones)
-9. [Licencia](#licencia)
+7. [Scripts Adicionales](#scripts-adicionales)
+8. [Implementación de E2EE](#implementación-de-e2ee)
+9. [Contribuciones](#contribuciones)
+10. [Licencia](#licencia)
 
 ---
 
@@ -28,6 +29,8 @@ Bienvenido a **MiChat**, una aplicación de chat desarrollada con Flask que impl
 - **Mensajería en Tiempo Real**: Utiliza Socket.IO para la comunicación en tiempo real entre los usuarios.
 - **Notificaciones**: Informa a los usuarios sobre nuevos mensajes mediante notificaciones del navegador.
 - **Cifrado de Extremo a Extremo (E2EE)**: Planeado para asegurar que solo los participantes en una conversación puedan leer los mensajes.
+- **Gestión de Usuarios de Prueba**: Incluye un script para generar usuarios de prueba en la base de datos.
+- **Limpieza de Datos y Reinicio**: Scripts para eliminar datos temporales y vaciar la base de datos.
 
 ---
 
@@ -64,9 +67,9 @@ git clone https://github.com/tu_usuario/mi-chat.git
 cd mi-chat
 ```
 
-### 2. Crear un Entorno Virtual
+### 2. Crear un Entorno Virtual (Opcional)
 
-Es recomendable utilizar un entorno virtual para gestionar las dependencias del proyecto y evitar conflictos con otras instalaciones de Python en tu sistema.
+Puedes usar un entorno virtual para gestionar las dependencias y evitar conflictos con otras instalaciones de Python. Esto es opcional:
 
 ```bash
 python3 -m venv venv
@@ -75,13 +78,10 @@ source venv/bin/activate  # En Windows: venv\Scripts\activate
 
 ### 3. Instalar Dependencias
 
-Asegúrate de que el archivo requirements.txt contiene todas las dependencias necesarias.
-
 ```bash
 pip install -r requirements.txt
 ```
-
-### 4. Configurar Variables de Entorno
+### 4. Configurar Variables de Entorno 
 
 Crea un archivo `.env` en la raíz del proyecto y añade las siguientes variables (ajusta los valores según tu configuración):
 
@@ -93,6 +93,15 @@ EMAIL_PASSWORD=tu_contraseña_de_aplicación
 # Clave secreta de Flask
 SECRET_KEY=tu_secret_key_api
 ```
+`
+
+Si no tienes una clave secreta para Flask, usa el script `secret.py` para generarla automáticamente:
+
+```bash
+python -c "import os; print(os.urandom(24).hex())"
+```
+
+Pega la clave generada en el archivo `.env` como `SECRET_KEY`.
 
 **Nota Importante**: Es fundamental que no compartas tu archivo `.env` públicamente, ya que contiene información sensible.
 
@@ -107,7 +116,17 @@ python
 >>> exit()
 ```
 
-### 6. Ejecutar la Aplicación
+### 6. Generar Usuarios de Prueba (Opcional)
+
+Ejecuta el script `crear_usuarios.py` para generar usuarios de prueba en la base de datos:
+
+```bash
+python crear_usuarios.py
+```
+
+Esto también creará un archivo `usuarios.txt` con las credenciales generadas.
+
+### 7. Ejecutar la Aplicación
 
 Inicia el servidor Flask ejecutando:
 
@@ -152,31 +171,51 @@ SECRET_KEY=tu_secret_key_api
 
 ```
 mi-chat/
-├── e2ee.py
-├── server.py
-├── database.py
-├── email_verification.py
-├── requirements.txt
-├── .env
+├── crear_usuarios.py           # Script para generar usuarios de prueba
+├── resetear_datos.py           # Script para limpiar datos y vaciar la base de datos
+├── e2ee.py                     # Archivo planeado para implementar E2EE
+├── secret.py                   # Script para generar claves secretas para Flask
+├── server.py                   # Servidor Flask principal
+├── database.py                 # Conexión y gestión de la base de datos
+├── email_verification.py       # Envío de correos de verificación
+├── requirements.txt            # Dependencias del proyecto
+├── .env                        # Variables de entorno
 ├── static/
 │   ├── css/
-│   │   └── styles.css
+│   │   └── styles.css          # Estilos CSS
 │   ├── js/
-│   │   └── menu_chat.js
+│   │   └── menu_chat.js        # Lógica del menú de chat
 │   ├── img/
-│   │   ├── none.jpg
-│   │   └── notification_icon.png
-│   └── uploads/
+│   │   ├── none.jpg            # Imagen predeterminada para perfiles
+│   │   └── notification_icon.png # Icono para notificaciones
+│   └── uploads/                # Carpeta para subir archivos
 ├── templates/
-│   ├── register.html
-│   ├── verify.html
-│   ├── login.html
-│   └── chat_list.html
-└── README.md
+│   ├── register.html           # Registro de usuarios
+│   ├── verify.html             # Verificación de usuarios
+│   ├── login.html              # Inicio de sesión
+│   └── chat_list.html          # Lista de chats
+└── README.md                   # Este archivo
 ```
 
 ---
 
+## Scripts Adicionales
+
+### **crear_usuarios.py**
+Este script genera usuarios ficticios para pruebas en la base de datos, con datos realistas y contraseñas encriptadas. Además, genera un archivo `usuarios.txt` con las credenciales generadas.
+
+### **resetear_datos.py**
+Permite limpiar el entorno de desarrollo eliminando:
+- Archivos temporales (`flask_session`, `__pycache__`, etc.).
+- La base de datos.
+- El archivo `usuarios.txt`.
+
+También incluye la función `vaciar_base_de_datos()` para eliminar los datos de todas las tablas de la base de datos sin borrar el archivo.
+
+### **secret.py**
+Genera una clave secreta aleatoria para ser utilizada como `SECRET_KEY` en Flask.
+
+---
 ## Implementación de E2EE
 
 Actualmente, MiChat está en proceso de implementación del Cifrado de Extremo a Extremo (E2EE). Este mecanismo asegurará que los mensajes sean cifrados en el frontend antes de ser enviados al servidor y almacenados en la base de datos de forma cifrada.

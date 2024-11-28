@@ -418,12 +418,23 @@ function formatDate(dateString) {
 }
 
 // Funciones para el modal de perfil
-function openProfileModal() {
-    document.getElementById('profile-modal').style.display = 'block';
-}
+
 
 function closeProfileModal() {
-    document.getElementById('profile-modal').style.display = 'none';
+    const modal = document.getElementById('profile-modal');
+    modal.classList.add('closing'); // Añadir clase de animación de cierre
+
+    // Esperar a que termine la animación antes de ocultarlo
+    setTimeout(() => {
+        modal.classList.remove('closing', 'show');
+        modal.style.display = 'none';
+    }, 500); // Tiempo coincide con la duración de la animación en CSS
+}
+
+function openProfileModal() {
+    const modal = document.getElementById('profile-modal');
+    modal.style.display = 'block';
+    modal.classList.add('show'); // Activar clase para mostrar el modal
 }
 
 // Funciones para el modal de perfil del usuario del chat
@@ -516,3 +527,7 @@ function changeProfilePicture() {
     // Simular clic en el input file
     inputFile.click();
 }
+document.querySelector('.settings-button').addEventListener('click', function () {
+    const dropdown = this.closest('.settings-dropdown');
+    dropdown.classList.toggle('active'); // Alternar la clase 'active'
+});

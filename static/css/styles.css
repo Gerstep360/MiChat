@@ -2,14 +2,14 @@
 
 /* Variables de colores */
 :root {
-    --primary-color: #00A86B; /* Verde esmeralda */
+    --primary-color: #1DB954; /* Verde oscuro vibrante */
     --accent-color: #FFD700; /* Dorado para acentos */
-    --secondary-color: #FFFFFF; /* Blanco para textos y elementos destacados */
-    --background-color: #E0F7FA; /* Azul claro como fondo general */
-    --surface-color: #FFFFFF; /* Superficie blanca para tarjetas y contenedores */
-    --text-color: #000000; /* Texto principal, negro */
-    --hint-color: #616161; /* Texto de ayuda, gris oscuro */
-    --border-color: #000000; /* Bordes negros para definición */
+    --secondary-color: #1F1F1F; /* Gris oscuro para fondos */
+    --background-color: #121212; /* Negro puro */
+    --surface-color: #181818; /* Superficie más clara */
+    --text-color: #EAEAEA; /* Blanco suave para texto */
+    --hint-color: #B3B3B3; /* Texto de ayuda, gris claro */
+    --border-color: #3E3E3E; /* Bordes grises para definición */
     --error-color: #D32F2F; /* Rojo para errores */
 }
 

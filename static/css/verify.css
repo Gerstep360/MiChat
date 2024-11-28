@@ -1,0 +1,103 @@
+:root {
+    --primary-color: #000000; /* Naranja vibrante, ideal para botones o acentos */
+    --accent-color: #f1c40f; /* Amarillo cálido, perfecto para destacar */
+    --secondary-color: #640D5F; /* Morado oscuro, ideal para fondos */
+    --background-color: #17202a; /* Negro suave para el fondo principal */
+    --surface-color: #1b2631; /* Morado apagado para elementos secundarios */
+    --text-color: #ffffff; /* Texto blanco */
+    --border-color: #000000; /* Gris claro */
+    --shadow-color: rgba(0, 0, 0, 0.2); /* Sombra ligera */
+}
+
+/* ESTILOS GENERALES */
+body {
+    margin: 0;
+    font-family: 'Arial', sans-serif;
+    background: var(--background-color);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    overflow: hidden; /* Evitar scroll innecesario */
+}
+
+.container {
+    background: var(--surface-color);
+    border-radius: 12px;
+    box-shadow: 0 4px 10px var(--shadow-color);
+    padding: 20px 30px;
+    width: 100%;
+    max-width: 400px; /* Compacto */
+    text-align: center;
+    box-sizing: border-box;
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+/* TÍTULO */
+h1 {
+    font-size: 1.8rem;
+    color: var(--accent-color);
+    margin-bottom: 15px;
+}
+
+/* FORMULARIO */
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px; /* Espaciado entre campos */
+    width: 100%; /* Adaptación completa */
+}
+
+/* CAMPOS Y ETIQUETAS */
+label {
+    text-align: left;
+    font-size: 1rem;
+    color: var(--text-color);
+}
+
+input[type="text"] {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 1rem;
+    background: var(--background-color);
+    color: var(--text-color);
+    box-shadow: inset 1px 1px 4px var(--shadow-color);
+    transition: border-color 0.3s ease;
+}
+
+input[type="text"]:focus {
+    border-color: var(--primary-color);
+    outline: none;
+}
+
+/* BOTÓN DE VERIFICAR */
+input[type="submit"] {
+    padding: 10px;
+    background: var(--primary-color);
+    color: var(--text-color);
+    font-weight: bold;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+input[type="submit"]:hover {
+    background: var(--secondary-color);
+    transform: translateY(-3px);
+}
+
+/* ANIMACIÓN */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

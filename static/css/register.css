@@ -1,0 +1,134 @@
+:root {
+    /* Colores principales */
+    --primary-color: #000000; /* Naranja vibrante, ideal para botones o acentos */
+    --accent-color: #f1c40f ; /* Amarillo cálido, perfecto para destacar */
+    --secondary-color: #640D5F; /* Morado oscuro, ideal para fondos */
+    --background-color: #17202a  ; /* Negro suave para el fondo principal */
+    --surface-color: #1b2631; /* Morado apagado para elementos secundarios */
+    --text-color: #ffffff; /* Gris oscuro */
+    --border-color: #000000; /* Gris claro */
+    --shadow-color: rgba(0, 0, 0, 0.1); /* Sombra ligera */
+}
+
+/* ESTILOS GENERALES */
+body {
+    margin: 0;
+    font-family: 'Arial', sans-serif;
+    background: var(--background-color);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    overflow: hidden; /* Eliminar scroll si no es necesario */
+}
+
+.container {
+    background: var(--surface-color);
+    border-radius: 12px;
+    box-shadow: 0 4px 10px var(--shadow-color);
+    padding: 20px 30px;
+    width: 100%;
+    max-width: 400px; /* Tamaño compacto */
+    height: auto; /* Ajuste dinámico según el contenido */
+    text-align: center;
+    box-sizing: border-box;
+}
+
+/* TÍTULO */
+h1 {
+    font-size: 1.8rem;
+    color: var(--accent-color);
+    margin-bottom: 15px;
+}
+
+/* FORMULARIO */
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px; /* Espaciado entre campos */
+    width: 100%; /* Adaptación completa */
+}
+
+/* CAMPOS Y ETIQUETAS */
+label {
+    text-align: left;
+    font-size: 1rem;
+    color: var(--text-color);
+}
+
+input[type="text"],
+input[type="email"],
+input[type="password"] {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 1rem;
+    background: var(--background-color);
+    color: var(--text-color);
+    box-shadow: inset 1px 1px 4px var(--shadow-color);
+    transition: border-color 0.3s ease;
+}
+
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus {
+    border-color: var(--primary-color);
+    outline: none;
+}
+
+/* BOTÓN SUBIR IMAGEN */
+.button-upload {
+    padding: 10px 20px;
+    background: var(--primary-color);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.button-upload:hover {
+    background: var(--secondary-color);
+    transform: translateY(-3px);
+}
+
+/* NOMBRE DEL ARCHIVO */
+.file-name {
+    font-size: 0.9rem;
+    text-align: left;
+    color: var(--text-color);
+    margin-top: -5px;
+}
+
+/* BOTÓN DE REGISTRO */
+input[type="submit"] {
+    padding: 10px;
+    background: var(--primary-color);
+    color: #fff;
+    font-weight: bold;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+input[type="submit"]:hover {
+    background: var(--secondary-color);
+    transform: translateY(-3px);
+}
+
+/* AJUSTE DINÁMICO PARA ALTURAS */
+@media (max-height: 600px) {
+    .container {
+        padding: 10px;
+        max-height: 90%; /* Ajustar en pantallas pequeñas */
+        overflow-y: auto; /* Activar scroll interno si es necesario */
+    }
+
+    input[type="submit"], .button-upload {
+        font-size: 0.9rem;
+    }
+}

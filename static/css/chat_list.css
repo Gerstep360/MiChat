@@ -1,0 +1,956 @@
+/* chat_list.css */
+
+/* VARIABLES DE COLORES */
+:root {
+    /* Colores principales */
+    --primary-color: #000000; /* Naranja vibrante, ideal para botones o acentos */
+    --accent-color: #f1c40f ; /* Amarillo cálido, perfecto para destacar */
+    --secondary-color: #640D5F; /* Morado oscuro, ideal para fondos */
+    --background-color: #17202a  ; /* Negro suave para el fondo principal */
+    --surface-color: #1b2631; /* Morado apagado para elementos secundarios */
+
+    /* Textos y bordes */
+    --text-color: #FFFFFF; /* Blanco puro para texto principal */
+    --hint-color: #D9D9D9; /* Gris claro para texto de ayuda */
+    --border-color: #000000; /* Bordes morados suaves */
+    --shadow-color: rgba(0, 0, 0, 0.5); /* Sombra translúcida */
+
+    /* Mensajes */
+    --panel_me: #273746; /* Amarillo brillante para mensajes propios */
+    --panel_other: #34495e ; /* Naranja vibrante para mensajes de otros */
+
+    /* Colores adicionales */
+    --highlight-color: #D91656; /* Rosa intenso, para botones o alertas */
+    --neutral-light: #F8E1DA; /* Neutral claro, para fondos */
+    --neutral-dark: #2A0D22; /* Neutral oscuro, para contrastes */
+    --shadow-highlight: rgba(100, 13, 95, 0.4); /* Sombra para paneles */
+}
+
+
+
+/* RESET Y ESTILOS BÁSICOS */
+body, html {
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--background-color);
+    color: var(--text-color);
+    height: 100vh;
+    overflow: hidden;
+}
+
+/* ESTILOS DE TEXTO */
+h1, h2, h3, h4, h5, h6 {
+    color: var(--text-color);
+    text-shadow: 2px 2px 3px var(--shadow-color); /* Sombra para resaltar */
+}
+
+h1 {
+    font-size: 2em;
+    font-weight: bold;
+    border-bottom: 2px solid var(--border-color); /* Línea decorativa */
+    padding-bottom: 5px;
+}
+
+h2 {
+    font-size: 1.75em;
+    font-weight: bold;
+}
+
+p {
+    font-size: 1em;
+    line-height: 1.5;
+    color: var(--mensage-color);
+}
+/* Botones */
+.button {
+    display: inline-block;
+    background-color: var(--accent-color); /* Fondo dorado */
+    color: var(--text-color); /* Texto blanco suave */
+    padding: 14px 20px;
+    margin: 10px 0;
+    border: 2px solid var(--border-color); /* Borde gris oscuro */
+    border-radius: 12px; /* Bordes redondeados */
+    cursor: pointer;
+    text-decoration: none;
+    font-weight: bold;
+    box-shadow: 3px 3px 0 var(--shadow-color); /* Sombra sólida */
+    transition: background-color 0.3s ease, transform 0.2s ease; /* Transiciones */
+}
+
+.button:hover {
+    background-color: var(--primary-color); /* Verde vibrante */
+    color: var(--mensage-color); /* Texto gris oscuro */
+    transform: translateY(-2px); /* Pequeño "salto" al hacer hover */
+    box-shadow: 4px 4px 0 var(--shadow-color); /* Sombra más pronunciada */
+}
+
+
+
+/* Campos de texto */
+input[type="text"] {
+    width: 100%;
+    padding: 12px 20px;
+    margin: 8px 0;
+    background-color: var(--surface-color); /* Fondo gris claro */
+    color: var(--text-color); /* Texto blanco */
+    border: 2px solid var(--border-color); /* Borde gris oscuro */
+    border-radius: 12px;
+    box-sizing: border-box;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+
+
+/* Botón de enviar formulario */
+input[type="submit"], .send-button {
+    background-color: var(--accent-color); /* Fondo dorado */
+    color: var(--text-color); /* Texto blanco */
+    padding: 14px 20px;
+    border: 2px solid var(--border-color); /* Borde gris oscuro */
+    border-radius: 12px;
+    cursor: pointer;
+    font-weight: bold;
+    box-shadow: 3px 3px 0 var(--shadow-color); /* Sombra sólida */
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+input[type="submit"]:hover, .send-button:hover {
+    background-color: var(--primary-color); /* Verde vibrante */
+    color: var(--secondary-color); /* Texto gris oscuro */
+    transform: translateY(-2px); /* Efecto flotante */
+    box-shadow: 4px 4px 0 var(--shadow-color); /* Sombra más pronunciada */
+}
+
+/* TARJETAS DE CHAT */
+.chat-card {
+    background-color: var(--surface-color); /* Fondo gris oscuro */
+    border: 2px solid var(--border-color); /* Borde gris */
+    border-radius: 12px; /* Bordes ligeramente redondeados */
+    margin: 8px 0;
+    padding: 10px 15px; /* Espaciado interno */
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    box-shadow: 3px 3px 0 var(--shadow-color); /* Sombra sólida */
+    transition: transform 0.2s, box-shadow 0.2s, background-color 0.3s; /* Animaciones suaves */
+}
+
+.chat-card:hover {
+    transform: translateY(-2px); /* Efecto de elevación */
+    box-shadow: 4px 4px 0 var(--shadow-color); /* Sombra más pronunciada */
+    background-color: var(--primary-color); /* Fondo verde vibrante al pasar el mouse */
+    border-color: var(--primary-color); /* Cambiar color del borde */
+}
+
+.chat-card img {
+    border-radius: 50%; /* Imagen circular */
+    margin-right: 16px;
+    width: 50px;
+    height: 50px;
+    border: 2px solid var(--border-color); /* Pequeño borde alrededor del avatar */
+    box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5); /* Sombra alrededor del avatar */
+}
+
+.chat-card .chat-info {
+    flex-grow: 1; /* Ocupa todo el espacio disponible */
+}
+
+.chat-card .chat-info h4 {
+    margin: 0;
+    font-size: 1.25em; /* Tamaño destacado */
+    font-weight: bold;
+    color: var(--text-color); /* Texto blanco */
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5); /* Sombra suave en el texto */
+}
+
+.chat-card .chat-info p {
+    margin: 4px 0 0;
+    font-size: 0.9em; /* Texto más pequeño */
+    color: var(--mensage-color); /* Gris claro */
+    text-shadow: none; /* Sin sombra en subtítulos */
+}
+
+/* ANIMACIONES */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px); /* Empieza desde abajo */
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0); /* Llega a su posición original */
+    }
+}
+
+.fade-in {
+    animation: fadeIn 0.5s ease-in-out; /* Aplicar animación al cargar */
+}
+
+/* ESTRUCTURA DE DOS PANELES */
+.main-container {
+    display: flex;
+    height: 100vh;
+    background-color: var(--background-color); /* Fondo global */
+}
+
+/* PANEL DE LISTA DE CHATS */
+.chat-list-panel {
+    width: 30%;
+    background-color: var(--surface-color); /* Fondo gris oscuro */
+    border-right: 2px solid var(--border-color); /* Línea divisoria */
+    display: flex;
+    flex-direction: column;
+    box-shadow: 4px 0 6px rgba(0, 0, 0, 0.2); /* Sombra entre paneles */
+}
+
+/* PANEL DE CHAT */
+.chat-window-panel {
+    width: 70%;
+    background-color: var(--background-color); /* Fondo oscuro */
+    display: flex;
+    flex-direction: column;
+    box-shadow: -4px 0 6px rgba(0, 0, 0, 0.2); /* Sombra hacia el panel izquierdo */
+}
+
+/* ENCABEZADO DE LA LISTA DE CHATS */
+.chat-list-header {
+    display: flex;
+    align-items: center;
+    padding: 15px;
+    background-color: var(--background-color); /* Fondo oscuro */
+    border-bottom: 2px solid var(--border-color); /* Línea divisoria */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3); /* Sombra inferior */
+}
+
+.chat-list-header h2 {
+    margin: 0;
+    flex-grow: 1; /* Ocupa todo el espacio horizontal */
+    font-size: 1.5em;
+    font-weight: bold;
+    color: var(--text-color); /* Texto claro */
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3); /* Sombra sutil */
+}
+
+/* IMAGEN DE PERFIL */
+.profile-picture {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%; /* Imagen circular */
+    cursor: pointer;
+    margin-right: 10px;
+    border: 2px solid var(--border-color); /* Borde gris oscuro */
+    box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5); /* Sombra para destacar */
+}
+
+/* BOTÓN DE NUEVO CHAT */
+.new-chat-button {
+    background-color: var(--primary-color); /* Fondo dorado */
+    color: var(--text-color); /* Texto blanco */
+    border: 2px solid var(--border-color); /* Borde gris oscuro */
+    border-radius: 50%; /* Botón circular */
+    width: 40px;
+    height: 40px;
+    font-size: 1.25rem;
+    cursor: pointer;
+    margin-left: 10px;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3); /* Sombra para efecto cel shading */
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.new-chat-button:hover {
+    background-color: var(--primary-color); /* Fondo verde */
+    transform: translateY(-2px); /* Efecto flotante */
+    box-shadow: 4px 4px 6px rgba(0, 0, 0, 0.5); /* Sombra más pronunciada */
+}
+
+#search-input {
+    padding: 10px;
+    border: none;
+    border-bottom: 1px solid var(--border-color);
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* LISTA DE CHATS */
+#chat-list {
+    flex-grow: 1;
+    overflow-y: auto; /* Scroll vertical */
+    padding: 10px;
+    scrollbar-width: thin; /* Scroll delgado */
+    scrollbar-color: var(--primary-color) var(--surface-color); /* Colores personalizados */
+}
+
+#chat-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+#chat-list::-webkit-scrollbar-thumb {
+    background-color: var(--primary-color); /* Color del scroll */
+    border-radius: 5px;
+}
+
+#chat-list::-webkit-scrollbar-track {
+    background-color: var(--surface-color); /* Fondo del track */
+}
+/* PANEL DE CHAT */
+.chat-window {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background-color: var(--background-color); /* Fondo oscuro */
+    box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5); /* Sombras internas para profundidad */
+}
+
+/* ENCABEZADO DEL CHAT */
+.chat-header {
+    display: flex;
+    align-items: center;
+    padding: 15px;
+    background-color: var(--surface-color); /* Fondo gris oscuro */
+    border-bottom: 2px solid var(--border-color); /* Línea divisoria */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3); /* Sombra inferior */
+    position: sticky; /* Fijo en la parte superior */
+    top: 0;
+    z-index: 10; /* Asegura que se mantenga por encima del contenido */
+}
+
+/* IMAGEN DE PERFIL EN EL ENCABEZADO */
+.chat-header .profile-picture {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%; /* Imagen circular */
+    margin-right: 15px;
+    cursor: pointer;
+    border: 2px solid var(--border-color); /* Borde gris */
+    box-shadow: 1px 1px 4px rgba(0, 0, 0, 0.5); /* Sombra sutil */
+    transition: transform 0.2s ease, box-shadow 0.3s ease; /* Suaviza la interacción */
+}
+
+.chat-header .profile-picture:hover {
+    transform: scale(1.05); /* Efecto de zoom */
+    box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.7); /* Sombra más pronunciada */
+}
+
+/* TEXTO DEL ENCABEZADO */
+.chat-header h2 {
+    margin: 0;
+    font-size: 1.5em;
+    font-weight: bold;
+    color: var(--text-color); /* Texto blanco */
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3); /* Sombra en el texto */
+}
+
+.chat-header p {
+    margin: 0;
+    font-size: 0.9em;
+    color: var(--hint-color); /* Texto gris claro */
+}
+
+/* ESTADO DE ESCRITURA */
+#typing-status {
+    font-size: 0.9em;
+    color: var(--hint-color); /* Gris claro */
+    font-style: italic;
+    margin-top: 5px;
+}
+
+/* MENSAJES EN EL CHAT */
+.chat-messages {
+    flex-grow: 1;
+    overflow-y: auto;
+    padding: 15px;
+    background-color: var(--background-color); /* Fondo oscuro */
+    background-image: url('/static/img/chat-background.png'); /* Fondo personalizado */
+    background-size: cover; /* Ajuste completo de la imagen */
+    background-position: center; /* Centrado de la imagen */
+    box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.3); /* Sombras internas */
+    scrollbar-width: thin; /* Scroll delgado */
+    scrollbar-color: var(--primary-color) transparent; /* Colores del scroll */
+}
+
+/* SCROLL PERSONALIZADO */
+.chat-messages::-webkit-scrollbar {
+    width: 6px;
+}
+
+.chat-messages::-webkit-scrollbar-thumb {
+    background-color: var(--primary-color); /* Scroll en color verde */
+    border-radius: 3px;
+}
+
+.chat-messages::-webkit-scrollbar-track {
+    background: transparent; /* Fondo del track transparente */
+}
+/* FORMULARIO DE MENSAJES */
+.message-form {
+    display: flex;
+    align-items: center;
+    padding: 15px;
+    background-color: var(--surface-color); /* Fondo gris oscuro */
+    border-top: 2px solid var(--border-color); /* Línea divisoria superior */
+    box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.2); /* Sombra superior */
+}
+
+/* CAMPO DE TEXTO */
+.message-form input[type="text"] {
+    flex-grow: 1; /* Ocupa el máximo espacio */
+    padding: 12px 15px;
+    border: 2px solid var(--border-color); /* Borde gris */
+    border-radius: 25px; /* Bordes redondeados */
+    margin-right: 15px;
+    background-color: var(--background-color); /* Fondo oscuro */
+    color: var(--text-color); /* Texto blanco */
+    font-size: 1rem; /* Tamaño del texto */
+    outline: none; /* Sin contorno al enfocar */
+    box-shadow: inset 2px 2px 5px rgba(0, 0, 0, 0.3); /* Sombra interna */
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.message-form input[type="text"]:focus {
+    border-color: var(--primary-color); /* Verde vibrante al enfocar */
+    box-shadow: 0 0 8px var(--primary-color); /* Resplandor */
+}
+
+/* BOTÓN DE ENVIAR */
+.send-button {
+    background-color: var(--primary-color); /* Verde vibrante */
+    color: var(--secondary-color); /* Texto oscuro */
+    border: none; /* Sin borde */
+    border-radius: 50%; /* Botón circular */
+    width: 50px;
+    height: 50px;
+    font-size: 1.5rem; /* Ícono más grande */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3); /* Sombra para efecto cel shading */
+    transition: transform 0.2s ease, background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.send-button:hover {
+    background-color: var(--accent-color); /* Fondo dorado */
+    transform: translateY(-2px); /* Efecto flotante */
+    box-shadow: 4px 4px 6px rgba(0, 0, 0, 0.5); /* Sombra más pronunciada */
+}
+
+/* BOTÓN ADICIONAL (SI SE USA) */
+.message-form button {
+    padding: 10px 20px;
+    border: 2px solid var(--border-color); /* Borde gris */
+    border-radius: 12px; /* Bordes redondeados */
+    background-color: var(--accent-color); /* Fondo dorado */
+    color: var(--text-color); /* Texto blanco */
+    font-size: 1rem;
+    cursor: pointer;
+    font-weight: bold;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3); /* Sombra para efecto cel shading */
+    transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+}
+
+.message-form button:hover {
+    background-color: var(--primary-color); /* Verde vibrante */
+    color: var(--secondary-color); /* Texto oscuro */
+    transform: translateY(-2px); /* Efecto flotante */
+    box-shadow: 4px 4px 6px rgba(0, 0, 0, 0.5); /* Sombra más pronunciada */
+}
+
+/* CHAT GENERAL */
+.chat-messages {
+    display: flex;
+    flex-direction: column; /* Organiza mensajes en columnas */
+    gap: 10px; /* Espaciado entre mensajes */
+    flex-grow: 1;
+    overflow-y: auto; /* Habilitar scroll para mensajes largos */
+    padding: 16px;
+    background-color: var(--background-color);
+    background-image: url('/static/img/chat-background.png');
+    background-size: cover;
+    box-sizing: border-box; /* Asegura que el padding no afecte el tamaño */
+}
+
+/* BURBUJAS DE MENSAJE */
+.message-bubble {
+    position: relative;
+    display: inline-block;
+    margin: 4px 0; /* Espaciado vertical entre burbujas */
+    padding: 12px 16px; /* Espaciado interno */
+    border-radius: 15px;
+    max-width: 70%; /* Limita el ancho máximo al 70% del contenedor */
+    word-wrap: break-word; /* Divide palabras largas en líneas nuevas */
+    word-break: break-word; /* Ajusta texto largo */
+    box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.2); /* Efecto cel shading */
+    transition: transform 0.2s ease, box-shadow 0.3s ease;
+    font-size: 1rem; /* Tamaño de texto legible */
+    flex-shrink: 1; /* Permite ajuste dinámico al contenido */
+}
+
+/* MENSAJE PROPIO */
+.message-bubble.me {
+    align-self: flex-end; /* Alinea mensajes propios a la derecha */
+    background-color: var(--panel_me);
+    color: var(--mensage-color);
+    text-align: left;
+    border-top-right-radius: 0; /* Diferenciación visual */
+}
+
+.message-bubble.me:hover {
+    transform: scale(1.02);
+    box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.3); /* Efecto más fuerte al pasar el mouse */
+}
+
+/* MENSAJE DE OTRO USUARIO */
+.message-bubble.other {
+    align-self: flex-start; /* Alinea mensajes de otros a la izquierda */
+    background-color: var(--panel_other);
+    color: var(--text-color);
+    text-align: left;
+    border-top-left-radius: 0; /* Diferenciación visual */
+}
+
+.message-bubble.other:hover {
+    transform: scale(1.02);
+    box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.3); /* Efecto más fuerte al pasar el mouse */
+}
+
+/* INFO DEL REMITENTE (para mensajes de otros usuarios) */
+.sender-info {
+    display: flex;
+    align-items: center;
+    margin-bottom: 5px;
+}
+
+.sender-image {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    margin-right: 10px;
+    box-shadow: 1px 1px 4px rgba(0, 0, 0, 0.3); /* Efecto de sombra */
+}
+
+.sender-name {
+    font-weight: bold;
+    font-size: 0.85rem;
+    color: var(--mensage-color); /* Gris claro */
+}
+
+/* ANIMACIONES */
+.message-bubble {
+    animation: fadeInUp 0.3s ease-in-out; /* Animación de entrada */
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Estilos del modal */
+.modal {
+    display: none; /* Oculto por defecto */
+    position: fixed;
+    z-index: 100; /* Por encima de otros elementos */
+    left: 0;
+    top: 0;
+    width: 100%; /* Ancho completo */
+    height: 100%; /* Alto completo */
+    overflow: auto; /* Scroll si es necesario */
+    background-color: rgba(0, 0, 0, 0.5); /* Fondo semitransparente */
+    backdrop-filter: blur(8px); /* Efecto de desenfoque */
+    animation: fadeIn 0.5s ease-in-out; /* Animación al mostrar */
+}
+
+.modal.show {
+    display: block; /* Modal visible */
+}
+
+.modal.closing {
+    animation: fadeOut 0.5s ease-in-out; /* Animación de salida */
+    pointer-events: none; /* Deshabilitar interacción al cerrar */
+}
+
+/* Contenido del modal */
+.modal-content {
+    position: relative;
+    background-color: var(--surface-color);
+    margin: auto;
+    padding: 20px;
+    border: 1px solid var(--border-color);
+    width: 80%;
+    max-width: 500px;
+    border-radius: 20px;
+    animation: zoomIn 0.5s ease-in-out; /* Animación de entrada */
+}
+
+.modal.closing .modal-content {
+    animation: zoomOut 0.5s ease-in-out; /* Animación de salida */
+}
+
+/* Botón de cierre */
+.close {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    color: var(--error-color); /* Rojo visible */
+    font-size: 2rem;
+    font-weight: bold;
+    cursor: pointer;
+    background: none;
+    border: none;
+    transition: transform 0.3s ease, color 0.3s ease;
+    z-index: 10;
+}
+
+.close:hover {
+    color: rgba(211, 47, 47, 0.8); /* Rojo más suave al pasar el mouse */
+    transform: scale(1.2); /* Pequeña ampliación */
+}
+
+/* Imagen de perfil */
+.profile-modal-image {
+    width: 100%;
+    border-radius: 20px;
+    object-fit: cover;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    margin-top: 50px; /* Espacio entre la imagen y el botón de cierre */
+    margin-bottom: 20px; /* Separación inferior */
+}
+
+/* Botones dentro del modal */
+.profile-modal-button {
+    width: calc(100% - 40px);
+    margin: 10px 20px;
+    padding: 12px 20px;
+    background-color: var(--primary-color);
+    color: var(--secondary-color);
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
+    font-weight: bold;
+    cursor: pointer;
+    text-align: center;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.profile-modal-button:hover {
+    background-color: var(--accent-color);
+    transform: translateY(-2px); /* Ligero movimiento hacia arriba */
+}
+
+/* Animaciones */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+    }
+    to {
+        opacity: 0;
+    }
+}
+
+@keyframes zoomIn {
+    from {
+        transform: scale(0.9);
+    }
+    to {
+        transform: scale(1);
+    }
+}
+
+@keyframes zoomOut {
+    from {
+        transform: scale(1);
+    }
+    to {
+        transform: scale(0.9);
+    }
+}
+
+/* Estilos para las tarjetas de usuario */
+.user-card {
+    background-color: var(--surface-color);
+    border: 2px solid var(--border-color);
+    border-radius: 15px;
+    margin: 10px 0;
+    padding: 12px;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: 2px 4px 6px rgba(0, 0, 0, 0.1); /* Sombra ligera */
+}
+
+/* Efecto hover en la tarjeta */
+.user-card:hover {
+    transform: translateY(-4px); /* Efecto de elevación */
+    box-shadow: 4px 8px 12px rgba(0, 0, 0, 0.2); /* Sombra más intensa */
+    border-color: var(--primary-color); /* Resaltar el borde con color primario */
+}
+
+/* Imagen de usuario */
+.user-card img {
+    border-radius: 50%;
+    margin-right: 16px;
+    width: 60px; /* Tamaño ligeramente más grande */
+    height: 60px;
+    object-fit: cover; /* Ajustar contenido dentro del contenedor */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Sombra para la imagen */
+    transition: transform 0.3s ease;
+}
+
+/* Efecto hover en la imagen */
+.user-card:hover img {
+    transform: scale(1.1); /* Aumentar ligeramente el tamaño */
+}
+
+/* Información del usuario */
+.user-card .user-info h4 {
+    margin: 0;
+    font-size: 1.25em;
+    font-weight: bold;
+    color: var(--mensage-color);
+    text-transform: capitalize; /* Primeras letras en mayúsculas */
+    letter-spacing: 0.5px; /* Espaciado entre letras */
+    transition: color 0.3s ease;
+}
+
+/* Texto adicional o subtítulo */
+.user-card .user-info p {
+    margin: 5px 0 0;
+    font-size: 0.9em;
+    color: var(--hint-color);
+    transition: color 0.3s ease;
+}
+
+/* Hover en la información */
+.user-card:hover .user-info h4 {
+    color: var(--accent-color); /* Resaltar el título */
+}
+
+.user-card:hover .user-info p {
+    color: var(--text-color); /* Resaltar el subtítulo */
+}
+
+/* Animación de desvanecimiento */
+.fade-in {
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px); /* Movimiento hacia arriba */
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Animación de escritura */
+@keyframes typing {
+    0% {
+        width: 0;
+    }
+    100% {
+        width: 100%;
+    }
+}
+
+.typing-animation {
+    overflow: hidden;
+    white-space: nowrap;
+    border-right: 2px solid var(--hint-color); /* Simula el cursor */
+    animation: typing 2s steps(22, end) infinite, blink 0.7s step-end infinite;
+    font-size: 1.2em; /* Tamaño legible */
+    color: var(--text-color);
+}
+
+@keyframes blink {
+    50% {
+        border-color: transparent; /* Hace que el cursor parpadee */
+    }
+    100% {
+        border-color: var(--hint-color);
+    }
+}
+
+/* Estilo para el nombre del archivo */
+.file-name {
+    display: block;
+    margin: 8px 0;
+    padding: 5px 10px; /* Espaciado interno */
+    background-color: rgba(255, 255, 255, 0.05); /* Fondo tenue */
+    border: 1px solid var(--border-color); /* Bordes para definición */
+    border-radius: 8px;
+    color: var(--hint-color);
+    font-size: 0.9em;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.file-name:hover {
+    background-color: rgba(255, 255, 255, 0.1); /* Resaltar al pasar el mouse */
+    color: var(--text-color); /* Texto más claro */
+}
+
+/* Estilos para el contenedor de los botones de cabecera */
+.header-buttons {
+    display: flex;
+    align-items: center;
+    gap: 10px; /* Espaciado entre botones */
+}
+
+.header-buttons .icon-button {
+    background-color: var(--primary-color); /* Fondo dorado */
+    color: var(--text-color); /* Texto blanco */
+    border: 2px solid var(--border-color); /* Borde gris oscuro */
+    border-radius: 50%; /* Botón circular */
+    width: 40px;
+    height: 40px;
+    font-size: 1.25rem;
+    cursor: pointer;
+    margin-left: 10px;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3); /* Sombra para efecto cel shading */
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+
+.header-buttons .icon-button:hover {
+    background-color: var(--primary-color); /* Fondo verde */
+    transform: translateY(-2px); /* Efecto flotante */
+    box-shadow: 4px 4px 6px rgba(0, 0, 0, 0.5); /* Sombra más pronunciada */
+}
+
+
+/* Estilos para el menú desplegable */
+.settings-dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.settings-menu {
+    display: none; /* Oculto por defecto */
+    position: absolute;
+    right: 0;
+    background-color: var(--surface-color);
+    min-width: 150px;
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 1;
+    overflow: hidden;
+}
+
+.settings-menu .settings-menu-item {
+    background-color: transparent;
+    color: var(--text-color);
+    padding: 12px 16px;
+    border: none;
+    border-bottom: 1px solid var(--border-color);
+    text-align: left;
+    width: 100%;
+    font-size: 1em;
+    cursor: pointer;
+}
+
+.settings-menu .settings-menu-item:last-child {
+    border-bottom: none;
+}
+
+.settings-menu .settings-menu-item:hover {
+    background-color: var(--primary-color);
+    color: var(--secondary-color);
+}
+/* Botones generales */
+.button {
+    display: inline-block;
+    background-color: var(--accent-color);
+    color: var(--text-color);
+    padding: 12px 24px; /* Mayor tamaño para mejor accesibilidad */
+    margin: 10px 0;
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
+    cursor: pointer;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 1rem; /* Texto más claro y legible */
+    transition: background-color 0.3s ease, transform 0.3s ease; /* Efecto suave */
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1); /* Ligera sombra */
+}
+
+.button:hover {
+    background-color: var(--primary-color);
+    color: var(--secondary-color);
+    transform: translateY(-2px); /* Efecto de elevación */
+    box-shadow: 0px 6px 10px rgba(0, 0, 0, 0.2); /* Sombra más pronunciada */
+}
+
+.button:active {
+    transform: translateY(2px); /* Efecto de presión */
+    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1); /* Sombra reducida */
+}
+
+/* Botones de ícono */
+.icon-button {
+    background-color: var(--accent-color);
+    border: 2px solid var(--border-color);
+    border-radius: 50%;
+    width: 48px; /* Tamaño ajustado para mayor claridad */
+    height: 48px;
+    font-size: 1.5rem; /* Ícono más visible */
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 10px;
+    color: var(--text-color);
+    transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1); /* Sombra inicial */
+}
+
+.icon-button:hover {
+    background-color: var(--primary-color);
+    color: var(--secondary-color);
+    transform: scale(1.1); /* Ampliación ligera */
+    box-shadow: 0px 6px 10px rgba(0, 0, 0, 0.2); /* Sombra más pronunciada */
+}
+
+.icon-button:active {
+    transform: scale(0.95); /* Efecto de presión */
+    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1); /* Sombra reducida */
+}
+
+/* Animación de desvanecimiento */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(40px); /* Movimiento más natural hacia arriba */
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.welcome-message {
+    text-align: center;
+    margin: auto;
+    color: var(--hint-color);
+    animation: fadeInUp 0.5s ease-in-out;
+    font-size: 1.2rem; /* Texto más legible */
+    max-width: 90%; /* Ajustar al contenedor */
+    line-height: 1.5; /* Mejorar espaciado del texto */
+}
