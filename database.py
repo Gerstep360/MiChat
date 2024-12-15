@@ -22,18 +22,11 @@ def init_db():
             password TEXT NOT NULL,
             profile_picture TEXT,
             status TEXT,
-            is_verified INTEGER DEFAULT 0
-            -- No incluimos last_seen aquí
+            is_verified INTEGER DEFAULT 0,
+            last_seen DATETIME,
+            public_key TEXT  -- Clave pública para E2EE
         )
     ''')
-    
-    # Verificar si las columnas 'last_seen' y 'public_key' existen
-    cursor.execute("PRAGMA table_info(users);")
-    columns = [column[1] for column in cursor.fetchall()]
-    
-    # Agregar 'last_seen' si no existe
-    if 'last_seen' not in columns:
-        cursor.execute('ALTER TABLE users ADD COLUMN last_seen DATETIME;')
     
     # Crear tabla de chats
     cursor.execute('''
@@ -48,19 +41,18 @@ def init_db():
     
     # Crear tabla de mensajes
     cursor.execute('''
-        CREATE TABLE IF NOT EXISTS messages (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            chat_id INTEGER,
-            sender_id INTEGER,
-            recipient_id INTEGER,
-            content TEXT,
-            nonce TEXT,  -- Para almacenar el nonce utilizado en el cifrado
-            timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY(chat_id) REFERENCES chats(chat_id),
-            FOREIGN KEY(sender_id) REFERENCES users(id),
-            FOREIGN KEY(recipient_id) REFERENCES users(id)
-        )
+    CREATE TABLE IF NOT EXISTS messages (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        chat_id INTEGER,
+        sender_id INTEGER,
+        recipient_id INTEGER,
+        content TEXT,  -- Almacena el mensaje cifrado JSON
+        timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY(chat_id) REFERENCES chats(chat_id),
+        FOREIGN KEY(sender_id) REFERENCES users(id),
+        FOREIGN KEY(recipient_id) REFERENCES users(id)
+    )
     ''')
-    
+        
     conn.commit()
     conn.close()

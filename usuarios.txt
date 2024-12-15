@@ -1,0 +1,102 @@
+Usuarios generados (contraseñas en texto plano):
+--------------------------------------------------
+Usuario: marta.vargas94
+Email: marta.vargas94@example.com
+Teléfono: +59163824753
+Contraseña: 3pB8F0lh
+--------------------------------------------------
+Usuario: paula.cruz91
+Email: paula.cruz91@example.com
+Teléfono: +59160802637
+Contraseña: bK7qc5pu
+--------------------------------------------------
+Usuario: carlos.lópez51
+Email: carlos.lópez51@example.com
+Teléfono: +59165281785
+Contraseña: 7IDMjQng
+--------------------------------------------------
+Usuario: marta.garcía19
+Email: marta.garcía19@example.com
+Teléfono: +59163566413
+Contraseña: lRAN5OT2
+--------------------------------------------------
+Usuario: carlos.ruiz75
+Email: carlos.ruiz75@example.com
+Teléfono: +59167743876
+Contraseña: EdD9XfRT
+--------------------------------------------------
+Usuario: ricardo.torres73
+Email: ricardo.torres73@example.com
+Teléfono: +59166624561
+Contraseña: 0G7GPCyd
+--------------------------------------------------
+Usuario: fernando.sánchez91
+Email: fernando.sánchez91@example.com
+Teléfono: +59179428900
+Contraseña: bFXQXU53
+--------------------------------------------------
+Usuario: lucía.cruz72
+Email: lucía.cruz72@example.com
+Teléfono: +59176012390
+Contraseña: C4ApfisF
+--------------------------------------------------
+Usuario: alberto.sánchez64
+Email: alberto.sánchez64@example.com
+Teléfono: +59179487234
+Contraseña: SC3DWFS8
+--------------------------------------------------
+Usuario: pedro.cruz58
+Email: pedro.cruz58@example.com
+Teléfono: +59174784854
+Contraseña: Wc3Ft5OP
+--------------------------------------------------
+Usuario: lucía.vargas11
+Email: lucía.vargas11@example.com
+Teléfono: +59167045701
+Contraseña: gYGJFLlu
+--------------------------------------------------
+Usuario: lucía.gutiérrez92
+Email: lucía.gutiérrez92@example.com
+Teléfono: +59172464685
+Contraseña: 0Q0XwZcF
+--------------------------------------------------
+Usuario: carlos.ramírez84
+Email: carlos.ramírez84@example.com
+Teléfono: +59166253845
+Contraseña: 7gtVfOgq
+--------------------------------------------------
+Usuario: sofía.lópez33
+Email: sofía.lópez33@example.com
+Teléfono: +59165844349
+Contraseña: PkI6RJMi
+--------------------------------------------------
+Usuario: ana.hernández57
+Email: ana.hernández57@example.com
+Teléfono: +59166105274
+Contraseña: QUagr3ta
+--------------------------------------------------
+Usuario: luis.martínez69
+Email: luis.martínez69@example.com
+Teléfono: +59170481108
+Contraseña: EamBV2Fu
+--------------------------------------------------
+Usuario: juan.vargas19
+Email: juan.vargas19@example.com
+Teléfono: +59161093796
+Contraseña: QZ9jViAP
+--------------------------------------------------
+Usuario: gabriela.sánchez98
+Email: gabriela.sánchez98@example.com
+Teléfono: +59165457704
+Contraseña: cg2740Lq
+--------------------------------------------------
+Usuario: daniel.rodríguez65
+Email: daniel.rodríguez65@example.com
+Teléfono: +59173476939
+Contraseña: XO8c76G0
+--------------------------------------------------
+Usuario: ana.vargas78
+Email: ana.vargas78@example.com
+Teléfono: +59161160824
+Contraseña: hYVPboq5
+--------------------------------------------------

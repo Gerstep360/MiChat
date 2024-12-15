@@ -2,12 +2,13 @@ import os
 import shutil  # Para eliminar directorios con contenido
 import sqlite3  # Para trabajar con la base de datos SQLite
 
-# Rutas de los archivos y directorios a eliminar
+# Rutas de los archivos y directorios a manejar
 sesion = "flask_session"
 cache = "__pycache__"
 bd = "database.db"
 upload = "static/uploads"
-usuarios="usuarios.txt"
+usuarios = "usuarios.txt"
+
 # Función para eliminar un archivo o directorio
 def eliminar_elemento(ruta):
     if os.path.exists(ruta):  # Verificar si existe
@@ -25,6 +26,24 @@ def eliminar_elemento(ruta):
                 print(f"No se pudo eliminar el directorio {ruta}: {e}")
     else:
         print(f"{ruta} no existe.")
+
+# Función para vaciar un directorio pero no eliminarlo
+def vaciar_directorio(ruta):
+    if os.path.exists(ruta) and os.path.isdir(ruta):  # Verificar si es un directorio
+        try:
+            for archivo in os.listdir(ruta):  # Iterar sobre los archivos en el directorio
+                archivo_ruta = os.path.join(ruta, archivo)
+                if os.path.isfile(archivo_ruta) or os.path.islink(archivo_ruta):  # Si es un archivo o enlace
+                    os.remove(archivo_ruta)
+                    print(f"El archivo {archivo_ruta} ha sido eliminado.")
+                elif os.path.isdir(archivo_ruta):  # Si es un subdirectorio
+                    shutil.rmtree(archivo_ruta)
+                    print(f"El subdirectorio {archivo_ruta} ha sido eliminado.")
+            print(f"El directorio '{ruta}' ha sido vaciado.")
+        except Exception as e:
+            print(f"No se pudo vaciar el directorio {ruta}: {e}")
+    else:
+        print(f"{ruta} no existe o no es un directorio.")
 
 # Función para vaciar todas las tablas de una base de datos SQLite
 def vaciar_base_de_datos(ruta_bd):
@@ -59,7 +78,10 @@ def vaciar_base_de_datos(ruta_bd):
 # Eliminar elementos
 eliminar_elemento(sesion)
 eliminar_elemento(cache)
-eliminar_elemento(upload)
 eliminar_elemento(usuarios)
+
+# Vaciar el directorio de uploads
+vaciar_directorio(upload)
+
 # Vaciar la base de datos
 vaciar_base_de_datos(bd)

@@ -593,6 +593,7 @@ def get_chat_id():
 def handle_send_message(data):
     room = data['room']
     message = data['message']
+    print(message)
     user_id = session.get('user_id')
     if not user_id:
         emit('error', {'error': 'No autenticado'})
