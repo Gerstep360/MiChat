@@ -6,17 +6,6 @@ let currentChatUserId;
 let typingStatusTimeout;
 let currentChatRoom;
 
-// Claves estáticas del remitente (Sender Keys)
-const senderKeys = {
-  privateKey: "070624de51d2a0df6b2ffc22b968fcec834a62e94fe080093b1697a8036f544",
-  publicKey: "2c55abed03d8f0524c7aceb0922de50a6c2d40ff822a7bcec19c091142498ae6",
-};
-
-// Claves estáticas del destinatario (Recipient Keys)
-const recipientKeys = {
-  privateKey: "04e6916c07c9aa9be4b81b9c2f674aef17425a7ab53db6dd0d7a2332a911101",
-  publicKey: "71f4d2e4f0e29b0fa1faaf6374dabfbef0c6157481617d0dfb5359d496f39f4d",
-};
 function initializeApp() {
   checkSession();
   loadCurrentUserInfo();
@@ -193,22 +182,10 @@ function sendMessage() {
   const messageInput = document.getElementById("message-input");
   const message = messageInput.value.trim();
 
-
-
   if (message !== "") {
-    const encryptedMessage = CryptoModule.encryptMessage(
-      message,
-      sharedKeySender
-    );
-
-    const decryptedMessage = CryptoModule.decryptMessage(
-      encryptedMessage,
-      sharedKeyRecipient
-    );
-    console.log("Decrypted Message:", decryptedMessage);
     socket.emit("send_message", {
       room: `chat_${currentChatRoom}`,
-      message: encryptedMessage,
+      message: message,
       recipient_id: currentChatUserId,
     });
     messageInput.value = "";
