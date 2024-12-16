@@ -59,7 +59,11 @@ def register_user():
     email = request.form['email']
     phone = request.form['phone']
     password = request.form['password']
-
+    public_key = request.form.get('public_key')
+    private_key = request.form.get('private_key')
+    # Validar que las claves E2EE estén presentes
+    if not public_key or not private_key:
+        return jsonify({'error': 'Claves E2EE faltantes.'}), 400
     # Manejar imagen de perfil
     # Manejar imagen de perfil
     file = request.files.get('profile_picture')
@@ -99,7 +103,8 @@ def register_user():
     session['password'] = generate_password_hash(password)
     session['phone'] = phone
     session['profile_picture'] = profile_picture_url
-
+    session['public_key'] = public_key
+    session['private_key'] = private_key
     # Enviar correo de verificación
     send_verification_email(email, verification_code)
 
@@ -114,18 +119,32 @@ def verify_page():
 # Ruta para verificar el código (POST)
 @app.route('/verify', methods=['POST'])
 def verify_code():
-    code = request.json['code']
+    code = request.json.get('code')
     if code == session.get('verification_code'):
         conn = get_db_connection()
         cursor = conn.cursor()
         cursor.execute('''
-            INSERT INTO users (username, email, phone, password, profile_picture, display_name, is_verified)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
-        ''', (session['username'], session['email'], session['phone'], session['password'], session['profile_picture'], session['display_name'], 1))
+            INSERT INTO users (username, email, phone, password, profile_picture, display_name, is_verified, public_key, private_key)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ''', (
+            session['username'],
+            session['email'],
+            session['phone'],
+            session['password'],
+            session['profile_picture'],
+            session['display_name'],
+            1,
+            session['public_key'],
+            session['private_key']
+        ))
         conn.commit()
         user_id = cursor.lastrowid
         conn.close()
         session['user_id'] = user_id
+        # Limpiar las claves de la sesión
+        session.pop('public_key', None)
+        session.pop('private_key', None)
+        session.pop('verification_code', None)
         return jsonify({'status': 'Usuario verificado y registrado.'}), 200
     else:
         return jsonify({'error': 'Código de verificación incorrecto.'}), 400
@@ -253,7 +272,7 @@ def get_chats():
     cursor.execute('''
         SELECT chats.chat_id, 
                CASE WHEN chats.user1_id = ? THEN chats.user2_id ELSE chats.user1_id END AS user_id,
-               u.username, u.profile_picture,
+               u.username, u.profile_picture, u.public_key,
                (SELECT content FROM messages WHERE chat_id = chats.chat_id ORDER BY timestamp DESC LIMIT 1) AS last_message
         FROM chats
         JOIN users u ON u.id = CASE WHEN chats.user1_id = ? THEN chats.user2_id ELSE chats.user1_id END
@@ -268,9 +287,11 @@ def get_chats():
             'user_id': chat['user_id'],
             'username': chat['username'],
             'profile_picture': chat['profile_picture'] or '/static/img/default_profile.png',
-            'last_message': chat['last_message'] or ''
+            'last_message': chat['last_message'] or '',
+            'public_key': chat['public_key']
         })
     return jsonify({'chats': chat_list}), 200
+
 
 # Ruta para iniciar un nuevo chat
 @app.route('/start_chat', methods=['POST'])
@@ -316,18 +337,22 @@ def get_current_user():
     user_id = session['user_id']
     conn = get_db_connection()
     cursor = conn.cursor()
-    cursor.execute('SELECT id, username, profile_picture FROM users WHERE id = ?', (user_id,))
+    # Incluir public_key y private_key en la consulta
+    cursor.execute('SELECT id, username, profile_picture, public_key, private_key FROM users WHERE id = ?', (user_id,))
     user = cursor.fetchone()
     conn.close()
     if user:
         user_info = {
             'id': user['id'],
             'username': user['username'],
-            'profile_picture': user['profile_picture'] or '/static/img/default_profile.png'
+            'profile_picture': user['profile_picture'] or '/static/img/default_profile.png',
+            'public_key': user['public_key'],
+            'private_key': user['private_key']
         }
         return jsonify({'status': True, 'user': user_info}), 200
     else:
         return jsonify({'error': 'Usuario no encontrado.'}), 404
+
 # Obtener información de otro usuario
 @app.route('/get_user_info', methods=['GET'])
 def get_user_info():
@@ -336,7 +361,8 @@ def get_user_info():
     other_user_id = request.args.get('user_id')
     conn = get_db_connection()
     cursor = conn.cursor()
-    cursor.execute('SELECT id, username, profile_picture, status, last_seen FROM users WHERE id = ?', (other_user_id,))
+    # Incluir public_key en la consulta
+    cursor.execute('SELECT id, username, profile_picture, status, last_seen, public_key FROM users WHERE id = ?', (other_user_id,))
     user = cursor.fetchone()
     conn.close()
     if user:
@@ -345,11 +371,13 @@ def get_user_info():
             'username': user['username'],
             'profile_picture': user['profile_picture'] or '/static/img/default_profile.png',
             'status': user['status'],
-            'last_seen': user['last_seen']
+            'last_seen': user['last_seen'],
+            'public_key': user['public_key']
         }
         return jsonify({'status': True, 'user': user_info}), 200
     else:
         return jsonify({'error': 'Usuario no encontrado.'}), 404
+
 
 # Notificar cambios de estado a los contactos
 def notify_contacts_status_change(user_id, status, last_seen=None):
@@ -435,20 +463,27 @@ def handle_send_message(data):
         chat_id = cursor.lastrowid
     else:
         chat_id = chat['chat_id']
+
     # Insertar mensaje en la base de datos
     cursor.execute('INSERT INTO messages (chat_id, sender_id, recipient_id, content) VALUES (?, ?, ?, ?)',
                    (chat_id, user_id, recipient_id, message))
     conn.commit()
-    # Obtener información del remitente
-    cursor.execute('SELECT username, profile_picture FROM users WHERE id = ?', (user_id,))
+
+    # Obtener información del remitente, incluyendo la public_key
+    cursor.execute('SELECT username, profile_picture, public_key FROM users WHERE id = ?', (user_id,))
     sender_info = cursor.fetchone()
     conn.close()
-    # Enviar el mensaje a la sala
+
+    # Verificar que la public_key tiene la longitud correcta
+    print(f"Sender Public Key Length: {len(sender_info['public_key'])}")  # Debe ser 130 o 66
+
+    # Enviar el mensaje a la sala, incluyendo sender_public_key
     emit('receive_message', {
         'message': message,
         'sender_id': user_id,
         'sender_username': sender_info['username'],
         'sender_profile_picture': sender_info['profile_picture'] or '/static/img/default_profile.png',
+        'sender_public_key': sender_info['public_key'],
         'chat_id': chat_id
     }, room=f'chat_{chat_id}')
 
@@ -587,50 +622,6 @@ def get_chat_id():
         chat_id = chat['chat_id']
     conn.close()
     return jsonify({'chat_id': chat_id}), 200
-
-
-@socketio.on('send_message')
-def handle_send_message(data):
-    room = data['room']
-    message = data['message']
-    user_id = session.get('user_id')
-    if not user_id:
-        emit('error', {'error': 'No autenticado'})
-        return
-
-    recipient_id = data.get('recipient_id')
-    if not recipient_id:
-        emit('error', {'error': 'Destinatario no especificado'})
-        return
-
-    # Obtener chat_id
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute('''
-        SELECT chat_id FROM chats WHERE (user1_id = ? AND user2_id = ?) OR (user1_id = ? AND user2_id = ?)
-    ''', (user_id, recipient_id, recipient_id, user_id))
-    chat = cursor.fetchone()
-    if not chat:
-        conn.close()
-        emit('error', {'error': 'Chat no encontrado.'})
-        return
-    chat_id = chat['chat_id']
-    # Insertar mensaje en la base de datos
-    cursor.execute('INSERT INTO messages (chat_id, sender_id, recipient_id, content) VALUES (?, ?, ?, ?)',
-                   (chat_id, user_id, recipient_id, message))
-    conn.commit()
-    # Obtener información del remitente
-    cursor.execute('SELECT username, profile_picture FROM users WHERE id = ?', (user_id,))
-    sender_info = cursor.fetchone()
-    conn.close()
-    # Enviar el mensaje a la sala
-    emit('receive_message', {
-        'message': message,
-        'sender_id': user_id,
-        'sender_username': sender_info['username'],
-        'sender_profile_picture': sender_info['profile_picture'] or '/static/img/default_profile.png',
-        'chat_id': chat_id
-    }, room=f'chat_{chat_id}')
 
 
 if __name__ == '__main__':

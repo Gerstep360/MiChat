@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>Registro - MiChat</title>
     <link rel="stylesheet" href="/static/css/register.css">
+
 </head>
 <body>
     <div class="container fade-in">
@@ -32,10 +33,21 @@
             <label for="password">Contraseña:</label>
             <input type="password" id="password" name="password" required>
 
+            <!-- Campos ocultos para las claves E2EE -->
+            <input type="hidden" id="public_key" name="public_key">
+            <input type="hidden" id="private_key" name="private_key">
+            <!-- Opcional: Campo oculto para la sal (si decides implementarlo) -->
+            <input type="hidden" id="salt" name="salt">
+
             <input type="submit" value="Registrarse" class="button">
         </form>
     </div>
     <script src="/static/js/main.js"></script>
+        <!-- Incluir elliptic.js y CryptoJS desde CDN -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/elliptic/6.5.4/elliptic.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+        <!-- Incluir tu archivo ee2e.js -->
+        <script src="/static/js/e2ee.js"></script>
     <script>
         // Mostrar el nombre del archivo seleccionado
         document.getElementById('profile_picture').addEventListener('change', function(){

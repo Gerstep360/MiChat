@@ -23,20 +23,55 @@ function checkSession() {
 
 
 // Registro de usuario
+// Manejar el envío del formulario de registro
 if (document.getElementById('register-form')) {
-    document.getElementById('register-form').addEventListener('submit', function(e) {
-        e.preventDefault();
-        const formData = new FormData(document.getElementById('register-form'));
-        fetch('/register', {
-            method: 'POST',
-            body: formData
-        }).then(response => response.json())
-          .then(data => {
-              alert(data.status || data.error);
-              if (data.status) {
-                  window.location.href = '/verify';
-              }
-          });
+    document.getElementById('register-form').addEventListener('submit', async function(e) {
+        e.preventDefault(); // Prevenir el comportamiento por defecto del formulario
+
+        // Obtener los valores del formulario
+        const username = document.getElementById('username').value;
+        const display_name = document.getElementById('display_name').value;
+        const email = document.getElementById('email').value;
+        const phone = document.getElementById('phone').value;
+        const password = document.getElementById('password').value;
+        const profile_picture = document.getElementById('profile_picture').files[0];
+
+        // Generar las claves E2EE utilizando CryptoModule (definido en ee2e.js)
+        const senderKeys = CryptoModule.generateSenderKeys();
+        const recipientKeys = CryptoModule.generateRecipientKeys();
+
+        // Derivar la clave compartida (opcional, dependiendo de tu implementación)
+        // const sharedKey = CryptoModule.deriveSharedKey(senderKeys.privateKey, recipientKeys.publicKey);
+
+        // Asignar las claves a los campos ocultos
+        document.getElementById('public_key').value = senderKeys.publicKey;
+        document.getElementById('private_key').value = senderKeys.privateKey;
+
+        // Opcional: Si estás implementando una sal para encriptar la clave privada
+        // const salt = CryptoJS.lib.WordArray.random(128/8).toString();
+        // document.getElementById('salt').value = salt;
+
+        // Crear un objeto FormData para enviar los datos del formulario
+        const formData = new FormData(this);
+
+        try {
+            const response = await fetch('/register', {
+                method: 'POST',
+                body: formData,
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                alert(data.status);
+                window.location.href = '/verify'; // Redirigir a la página de verificación
+            } else {
+                alert(data.error);
+            }
+        } catch (error) {
+            console.error('Error en el registro:', error);
+            alert('Ocurrió un error durante el registro.');
+        }
     });
 }
 

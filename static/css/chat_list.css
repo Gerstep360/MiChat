@@ -361,7 +361,6 @@ input[type="submit"]:hover, .send-button:hover {
     overflow-y: auto;
     padding: 15px;
     background-color: var(--background-color); /* Fondo oscuro */
-    background-image: url('/static/img/chat-background.png'); /* Fondo personalizado */
     background-size: cover; /* Ajuste completo de la imagen */
     background-position: center; /* Centrado de la imagen */
     box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.3); /* Sombras internas */
@@ -465,7 +464,6 @@ input[type="submit"]:hover, .send-button:hover {
     overflow-y: auto; /* Habilitar scroll para mensajes largos */
     padding: 16px;
     background-color: var(--background-color);
-    background-image: url('/static/img/chat-background.png');
     background-size: cover;
     box-sizing: border-box; /* Asegura que el padding no afecte el tamaño */
 }

@@ -265,7 +265,6 @@ input[type="submit"]:hover {
     overflow-y: auto;
     padding: 10px;
     background-color: var(--background-color);
-    background-image: url('/static/img/chat-background.png'); /* Si deseas agregar una imagen de fondo */
     background-size: cover;
 }
 
