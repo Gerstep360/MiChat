@@ -22,12 +22,17 @@ const CryptoModule = (() => {
 
     // Derivar clave compartida
     function deriveSharedKey(privateKey, publicKey) {
-        const privateKeyObject = EC.keyFromPrivate(privateKey, 'hex');
-        const publicKeyObject = EC.keyFromPublic(publicKey, 'hex');
+        if (privateKey.length !== 64 || publicKey.length !== 130) {
+          throw new Error("Clave privada o pública con formato incorrecto");
+        }
+      
+        const privateKeyObject = EC.keyFromPrivate(privateKey, "hex");
+        const publicKeyObject = EC.keyFromPublic(publicKey, "hex");
         const sharedSecret = privateKeyObject.derive(publicKeyObject.getPublic()).toString(16);
-        // Asegurar que la clave compartida tenga 64 caracteres
-        return sharedSecret.padStart(64, '0').slice(0, 64);
-    }
+      
+        return sharedSecret.padStart(64, "0").slice(0, 64); // Asegurar longitud fija
+      }
+      
 
     // Función para cifrar un mensaje
     function encryptMessage(message, sharedKey) {

@@ -437,27 +437,44 @@ def send_message():
 # Modificar el evento 'send_message' de Socket.IO
 @socketio.on('send_message')
 def handle_send_message(data):
-    room = data['room']
-    message = data['message']
+    room = data.get('room')
+    message = data.get('message', '').strip()
     user_id = session.get('user_id')
-    if not user_id:
-        emit('error', {'error': 'No autenticado'})
+
+
+    if not message:
+        print("Error: Mensaje vacío recibido en el backend.")
+        emit('error', {'error': 'El mensaje está vacío.'}, room=request.sid)
         return
 
+    # Validar usuario autenticado
+    if not user_id:
+        emit('error', {'error': 'No autenticado'}, room=request.sid)
+        return
+
+    # Validar contenido del mensaje
+    if not message:
+        emit('error', {'error': 'El mensaje está vacío.'}, room=request.sid)
+        return
+
+    # Validar destinatario
     recipient_id = data.get('recipient_id')
     if not recipient_id:
-        emit('error', {'error': 'Destinatario no especificado'})
+        emit('error', {'error': 'Destinatario no especificado'}, room=request.sid)
         return
 
-    # Obtener chat_id
+    # Conexión a la base de datos
     conn = get_db_connection()
     cursor = conn.cursor()
+
+    # Obtener o crear el chat
     cursor.execute('''
         SELECT chat_id FROM chats WHERE (user1_id = ? AND user2_id = ?) OR (user1_id = ? AND user2_id = ?)
     ''', (user_id, recipient_id, recipient_id, user_id))
     chat = cursor.fetchone()
+
     if not chat:
-        # Crear un nuevo chat si no existe
+        # Crear nuevo chat si no existe
         cursor.execute('INSERT INTO chats (user1_id, user2_id) VALUES (?, ?)', (user_id, recipient_id))
         conn.commit()
         chat_id = cursor.lastrowid
@@ -469,26 +486,30 @@ def handle_send_message(data):
                    (chat_id, user_id, recipient_id, message))
     conn.commit()
 
-    # Obtener información del remitente, incluyendo la public_key
+    # Obtener información del remitente
     cursor.execute('SELECT username, profile_picture, public_key FROM users WHERE id = ?', (user_id,))
     sender_info = cursor.fetchone()
     conn.close()
 
-    # Verificar que la public_key tiene la longitud correcta
-    print(f"Sender Public Key Length: {len(sender_info['public_key'])}")  # Debe ser 130 o 66
+    # Validar clave pública del remitente
+    sender_public_key = sender_info['public_key']
+    if not sender_public_key or len(sender_public_key) not in [130, 66]:
+        print(f"Clave pública inválida para el usuario {user_id}: {sender_public_key}")
+        sender_public_key = "Clave pública faltante o inválida"
 
-    # Enviar el mensaje a la sala, incluyendo sender_public_key
+    # Emitir mensaje al chat
     emit('receive_message', {
-        'message': message,
+        'content': message,
         'sender_id': user_id,
-        'sender_username': sender_info['username'],
-        'sender_profile_picture': sender_info['profile_picture'] or '/static/img/default_profile.png',
-        'sender_public_key': sender_info['public_key'],
+        'sender_username': sender_info['username'] or "Usuario desconocido",
+        'sender_profile_picture': sender_info['profile_picture'] or '/static/img/none.jpg',
+        'sender_public_key': sender_public_key,
         'chat_id': chat_id
     }, room=f'chat_{chat_id}')
 
-    # Notificar al destinatario para que actualice su lista de chats
+    # Notificar al destinatario para actualizar su lista de chats
     emit('update_chat_list', {}, room=f'user_{recipient_id}')
+
     
 # Obtener lista de usuarios (para iniciar un nuevo chat)
 @app.route('/get_users', methods=['GET'])

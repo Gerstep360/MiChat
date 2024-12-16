@@ -7,6 +7,7 @@ let typingStatusTimeout;
 let currentUserPrivateKey; 
 let currentUserProfilePicture; 
 let currentChatRoom;
+let recipient_public_key;
 const sharedKeys = {};
 
 function initializeApp() {
@@ -26,16 +27,11 @@ function initializeApp() {
 // Función para obtener la clave compartida, derivándola si es necesario
 function getSharedKey(userId, userPublicKey) {
   if (!sharedKeys[userId]) {
-    console.log(`Derivando clave compartida para user_id: ${userId}`);
-    console.log(`Clave privada actual: ${currentUserPrivateKey}`);
-    console.log(`Clave pública del usuario: ${userPublicKey}`);
-
     try {
-      // Asegurarse de que la clave pública tenga 130 caracteres (clave no comprimida)
       if (userPublicKey.length !== 130) {
         throw new Error(`Clave pública inválida: longitud ${userPublicKey.length}`);
       }
-
+      console.log("llave privada de currentuserprivate:", currentUserPrivateKey)
       sharedKeys[userId] = CryptoModule.deriveSharedKey(currentUserPrivateKey, userPublicKey);
       console.log(`Clave compartida derivada para user_id ${userId}: ${sharedKeys[userId]}`);
     } catch (error) {
@@ -43,9 +39,9 @@ function getSharedKey(userId, userPublicKey) {
       sharedKeys[userId] = null;
     }
   }
+  console.log(sharedKeys)
   return sharedKeys[userId];
 }
-
 // Verificar si el usuario está autenticado
 function checkSession(redirectIfAuthenticated = false) {
   fetch("/check_session").then((response) => {
@@ -69,24 +65,33 @@ function loadCurrentUserInfo() {
   fetch("/get_current_user")
     .then((response) => response.json())
     .then((data) => {
-      console.log("Respuesta de /get_current_user:", data); // Añadir log
       if (data.status) {
         currentUserId = data.user.id;
         currentUserPrivateKey = data.user.private_key;
-        console.log("Clave privada del usuario actual:", currentUserPrivateKey); // Añadir log
-        console.log("Clave pública del usuario actual:", data.user.public_key); // Añadir log
+        // Si no existe una clave privada, generar nuevas claves
+        if (!currentUserPrivateKey) {
+          const senderKeys = CryptoModule.generateSenderKeys();
+          currentUserPrivateKey = senderKeys.privateKey;
 
-        const profilePicture = document.getElementById("my-profile-picture");
-        profilePicture.src = data.user.profile_picture;
-        // Actualizar imagen en el modal
-        const profileModalImage = document.getElementById("profile-modal-image");
-        profileModalImage.src = data.user.profile_picture;
+          // Enviar al servidor la nueva clave pública
+          fetch("/update_user_public_key", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              public_key: senderKeys.publicKey,
+            }),
+          }).then((updateResponse) => {
+            if (!updateResponse.ok) {
+              console.error("Error al actualizar la clave pública en el servidor.");
+            }
+          });
+        }
 
-        // Guardar la clave pública y la imagen de perfil del usuario actual
-        currentUserPublicKey = data.user.public_key; // Añadir esta línea
-        currentUserProfilePicture = data.user.profile_picture; // Guardar la imagen de perfil
+        // Guardar la clave pública y otros datos del usuario
+        currentUserPublicKey = data.user.public_key || senderKeys.publicKey;
+        currentUserProfilePicture = data.user.profile_picture;
+        document.getElementById("my-profile-picture").src = currentUserProfilePicture;
 
-        // Configurar WebSocket después de obtener el ID del usuario
         setupWebSocket();
       } else {
         console.error("No se pudo cargar la información del usuario.");
@@ -98,11 +103,13 @@ function loadCurrentUserInfo() {
 }
 
 
+
 // Función para cargar la lista de chats
 function loadChatList() {
   fetch("/get_chats")
     .then((response) => response.json())
     .then((data) => {
+      console.log(data)
       const chatList = document.getElementById("chat-list");
       chatList.innerHTML = ""; // Limpiar la lista
       if (data.chats.length === 0) {
@@ -124,7 +131,7 @@ function loadChatList() {
               <img src="${chat.profile_picture}" alt="${chat.username}">
               <div class="chat-info">
                   <h4>${chat.username}</h4>
-                  <p>[Clave pública faltante]</p>
+                  <p>$[Clave pública faltante]</p>
               </div>
             `;
             chatCard.addEventListener("click", function () {
@@ -172,11 +179,14 @@ function loadChatList() {
                         <div class="chat-info">
                             <h4>${chat.username}</h4>
                             <p>${decryptedLastMessage}</p>
+                            <input type="hidden" id="public_key" name="public_key" value=${chat.public_key} />
                         </div>
                     `;
           chatCard.addEventListener("click", function () {
             // Cargar el chat en el panel derecho
-            loadChatWindow(chat.user_id);
+            recipient_public_key=chat.public_key;
+            console.log("lalve publica del receptor:", recipient_public_key)
+            loadChatWindow(chat.user_id, chat.public_key, chat.chat_id);
           });
           chatList.appendChild(chatCard);
         });
@@ -188,28 +198,17 @@ function loadChatList() {
 }
 
 // Función para cargar la ventana de chat
-function loadChatWindow(chatUserId) {
+function loadChatWindow(chatUserId, public_key,chatid) {
   currentChatUserId = chatUserId;
 
   // Mostrar la ventana de chat y ocultar el mensaje de bienvenida
   document.getElementById("chat-window").style.display = "flex";
   document.getElementById("welcome-message").style.display = "none";
 
-  // Obtener el chat_id
-  fetch(`/get_chat_id?user_id=${chatUserId}`)
-    .then((response) => response.json())
-    .then((data) => {
-      if (data.chat_id) {
-        currentChatRoom = data.chat_id; // Usar chat_id como nombre de la sala
-        // Unirse a la sala del chat
-        socket.emit("join", { room: `chat_${currentChatRoom}` });
-        // Cargar mensajes
-        loadMessages();
-      } else {
-        alert("No se pudo obtener el chat.");
-      }
-    });
 
+    currentChatRoom = chatid;
+    socket.emit("join", { room: `chat_${currentChatRoom}` });
+    loadMessages(public_key,chatUserId);
   // Obtener información del usuario
   fetch(`/get_user_info?user_id=${chatUserId}`)
     .then((response) => response.json())
@@ -234,7 +233,7 @@ function loadChatWindow(chatUserId) {
   const messageForm = document.getElementById("message-form");
   messageForm.onsubmit = function (e) {
     e.preventDefault();
-    sendMessage();
+    sendMessage(public_key,chatUserId);
   };
 
   // Manejar evento de input para detectar cuando el usuario está escribiendo
@@ -245,80 +244,62 @@ function loadChatWindow(chatUserId) {
 }
 
 // Función para cargar mensajes anteriores
-function loadMessages() {
+function loadMessages(public_key,chatuserid) {
   fetch(`/get_messages?chat_id=${currentChatRoom}`)
     .then((response) => response.json())
     .then((data) => {
       const chatMessages = document.getElementById("chat-messages");
       chatMessages.innerHTML = ""; // Limpiar el chat
+
       if (data.messages.length === 0) {
         const noMessages = document.createElement("p");
-        noMessages.innerText =
-          "No hay mensajes en este chat. ¡Inicia la conversación!";
+        noMessages.innerText = "No hay mensajes en este chat. ¡Inicia la conversación!";
         chatMessages.appendChild(noMessages);
       } else {
+        const sharedKey = getSharedKey(chatuserid, public_key);
+
         data.messages.forEach((msg) => {
-          displayMessage(msg);
+          const msg1=CryptoModule.decryptMessage(msg.content, sharedKey);
+          displayMessage(msg,msg1);
         });
         // Desplazar hacia abajo
         chatMessages.scrollTop = chatMessages.scrollHeight;
       }
+    })
+    .catch((error) => {
+      console.error("Error al cargar los mensajes:", error);
     });
 }
 
 // Enviar mensaje a través de Socket.IO
-function sendMessage() {
+function sendMessage(public_key,chatuserid) {
   const messageInput = document.getElementById("message-input");
   const message = messageInput.value.trim();
+  if (!message) {
+    console.error("El mensaje no puede estar vacío.");
+    return;
+  }
 
-  if (message !== "") {
-    // Obtener la clave pública del destinatario desde el backend
-    fetch(`/get_user_info?user_id=${currentChatUserId}`)
-      .then((response) => response.json())
-      .then((data) => {
-        if (data.status) {
-          const recipientPublicKey = data.user.public_key;
-          //console.log("Public Key del destinatario:", recipientPublicKey);
+  try {
+    console.log("Public key en enviar mensaje:",public_key)
+          const shared = getSharedKey(chatuserid, public_key)
+          const encryptedMessage = CryptoModule.encryptMessage(message, shared);
+          console.log("Mensaje cifrado para enviar:", encryptedMessage);
 
-          // Derivar la clave compartida
-          const sharedKey = getSharedKey(currentChatUserId, recipientPublicKey);
-          if (!sharedKey) {
-            console.error("No se pudo derivar la clave compartida.");
-            alert("Error al derivar la clave compartida. Intenta nuevamente.");
-            return;
-          }
-          //console.log("Clave compartida derivada:", sharedKey);
-
-          // Cifrar el mensaje
-          let encryptedMessage;
-          try {
-            encryptedMessage = CryptoModule.encryptMessage(message, sharedKey);
-            console.log("Mensaje cifrado:", encryptedMessage);
-          } catch (error) {
-            console.error("Error al cifrar el mensaje:", error);
-            alert("Error al cifrar el mensaje. Intenta nuevamente.");
-            return;
-          }
-
-          // Enviar el mensaje cifrado al backend
+          // Emitir mensaje al servidor sin llamar a displayMessage aquí
           socket.emit("send_message", {
             room: `chat_${currentChatRoom}`,
             message: encryptedMessage,
             recipient_id: currentChatUserId,
           });
 
-          // Mostrar el mensaje en el chat como 'me'
-          displayEncryptedMessage(message, encryptedMessage, true);
+          // Limpiar campo de entrada
           messageInput.value = "";
-        } else {
-          alert("No se pudo obtener la información del destinatario.");
+        } catch (error) {
+          console.error("Error al cifrar el mensaje:", error);
         }
-      })
-      .catch((error) => {
-        console.error("Error al obtener información del destinatario:", error);
-      });
-  }
 }
+
 
 // Configurar WebSocket para recibir y enviar mensajes
 function setupWebSocket() {
@@ -332,48 +313,27 @@ function setupWebSocket() {
 
     // Manejar recepción de mensajes
     socket.on("receive_message", function (data) {
-      console.log("Mensaje recibido:", data);
-      console.log(`Sender Public Key: ${data.sender_public_key}`); // Verificar la clave
-
-      if (data.chat_id == currentChatRoom) {
-          // Derivar la clave compartida usando sender_public_key
-          const sharedKey = getSharedKey(data.sender_id, data.sender_public_key);
-          if (!sharedKey) {
-              console.error("No se pudo derivar la clave compartida para el mensaje recibido.");
-              return;
-          }
-
-          // Descifrar el mensaje
-          let decryptedMessage = "";
-          try {
-              decryptedMessage = CryptoModule.decryptMessage(data.message, sharedKey);
-              console.log("Mensaje descifrado:", decryptedMessage);
-          } catch (error) {
-              console.error("Error al descifrar el mensaje recibido:", error);
-              decryptedMessage = "[Error al descifrar el mensaje]";
-          }
-
-          // Crear un objeto de mensaje con el contenido descifrado
-          const decryptedData = {
-              ...data,
-              message: decryptedMessage,
-          };
-
-          // Mostrar el mensaje descifrado
-          displayMessage(decryptedData);
+      console.log("Mensaje recibido desde el socket:", data);
+      if (data.chat_id === currentChatRoom) {
+        console.log("datos recibir:",data)
+        const sharedKey = getSharedKey(data.sender_id, recipient_public_key);
+    
+        if (!sharedKey) {
+          console.error("No se pudo derivar la clave compartida para el mensaje recibido.");
+          data.content = "[No se pudo descifrar el mensaje]";
+          return
+        } 
+        const content=data.content;
+         const msg = CryptoModule.decryptMessage(content, sharedKey);
+         console.log("mensaje enviado en socket recibido:",msg)
+        // Mostrar mensaje descifrado en el frontend
+        displayMessage(data,msg);
       } else {
-          // Mostrar notificación o indicador de nuevo mensaje en la lista de chats
-          showNotification(
-              data.sender_username,
-              "[Mensaje Cifrado]",
-              data.sender_id,
-              data.sender_profile_picture
-          );
-          // Recargar la lista de chats para mostrar el nuevo chat
-          loadChatList();
+        console.warn("El mensaje recibido no pertenece a la sala actual.");
+        loadChatList(); // Actualizar lista de chats en caso de mensaje nuevo
       }
-      updateChatListWithNewMessage(data.chat_id, data.message || data.content);
-  });
+    });
+    
 
 
     // Manejar evento de "escribiendo..."
@@ -418,7 +378,7 @@ function showNotification(title, message, senderId, profilePicture) {
 }
 
 // Mostrar mensaje en la ventana de chat
-function displayMessage(data) {
+function displayMessage(data,msg) {
   const chatMessages = document.getElementById("chat-messages");
   const messageBubble = document.createElement("div");
   messageBubble.classList.add("message-bubble");
@@ -426,51 +386,33 @@ function displayMessage(data) {
   const messageContent = document.createElement("div");
   messageContent.classList.add("message-content");
 
-  let decryptedMessage = data.message || data.content; // Valor por defecto
+  // Asegurarse de que el mensaje no esté vacío
+  let decryptedMessage = msg || "[Mensaje vacío]";
 
-  console.log("Mensaje:",data.message)
-  if (data.message) { // Si el mensaje está cifrado
-    // Derivar la clave compartida usando la clave privada del usuario y la clave pública del remitente
-    const senderId = data.sender_id;
-    const senderPublicKey = data.sender_public_key;
-    const sharedKey = getSharedKey(senderId, senderPublicKey);
-
-    if (!sharedKey) {
-      console.error("No se pudo derivar la clave compartida para descifrar el mensaje.");
-      decryptedMessage = "[No se pudo descifrar el mensaje]";
-    } else {
-      console.log("Clave compartida para descifrado:", sharedKey);
-
-      try {
-        // Descifrar el mensaje
-        decryptedMessage = CryptoModule.decryptMessage(data.message, sharedKey);
-        console.log("Mensaje descifrado:", decryptedMessage);
-      } catch (error) {
-        console.error("Error al descifrar el mensaje:", error);
-        decryptedMessage = "[Error al descifrar el mensaje]";
-      }
-    }
-  }
-
-  messageContent.innerText = decryptedMessage;
-
+  // Estilizar burbuja del mensaje
   if (data.sender_id === currentUserId) {
     messageBubble.classList.add("me");
   } else {
     messageBubble.classList.add("other");
   }
 
-  // Añadir el nombre de usuario y la imagen de perfil
+  // Añadir contenido del mensaje
+  messageContent.innerText = decryptedMessage;
+
+  // Añadir información del remitente
   const senderInfo = document.createElement("div");
   senderInfo.classList.add("sender-info");
 
   const senderName = document.createElement("span");
   senderName.classList.add("sender-name");
-  senderName.innerText = data.sender_username;
+  senderName.innerText = data.sender_id === currentUserId ? "Yo" : data.sender_username;
 
   const senderImage = document.createElement("img");
   senderImage.classList.add("sender-image");
-  senderImage.src = data.sender_profile_picture;
+  senderImage.src =
+    data.sender_id === currentUserId
+      ? currentUserProfilePicture
+      : data.sender_profile_picture || "/static/img/none.jpg";
 
   senderInfo.appendChild(senderImage);
   senderInfo.appendChild(senderName);
@@ -482,7 +424,6 @@ function displayMessage(data) {
   // Desplazar hacia abajo
   chatMessages.scrollTop = chatMessages.scrollHeight;
 }
-
 function displayEncryptedMessage(originalMessage, encryptedMessage, isSender) {
   const chatMessages = document.getElementById("chat-messages");
   const messageBubble = document.createElement("div");
@@ -508,7 +449,7 @@ function displayEncryptedMessage(originalMessage, encryptedMessage, isSender) {
 
   const senderImage = document.createElement("img");
   senderImage.classList.add("sender-image");
-  senderImage.src = isSender ? currentUserProfilePicture : "/static/img/default_profile.png"; // Usar la imagen correcta
+  senderImage.src = isSender ? currentUserProfilePicture : "/static/img/none.jpg"; // Usar la imagen correcta
 
   senderInfo.appendChild(senderImage);
   senderInfo.appendChild(senderName);
