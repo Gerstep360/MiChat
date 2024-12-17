@@ -698,48 +698,53 @@ function deleteProfilePicture() {
     });
 }
 
-function changeProfilePicture() {
+async function changeProfilePicture() {
   // Crear un input de tipo file oculto
-  const inputFile = document.createElement("input");
-  inputFile.type = "file";
-  inputFile.accept = "image/*";
-  inputFile.onchange = function () {
-    const file = inputFile.files[0];
-    if (file) {
-      // Validar el tamaño del archivo (opcional)
-      const maxSize = 5 * 1024 * 1024; // 5 MB
-      if (file.size > maxSize) {
-        alert("El archivo es demasiado grande. Tamaño máximo: 5 MB.");
-        return;
-      }
-      // Enviar el archivo al servidor para actualizar la foto de perfil
-      const formData = new FormData();
-      formData.append("profile_picture", file);
-      fetch("/change_profile_picture", {
-        method: "POST",
-        body: formData,
-      })
-        .then((response) => response.json())
-        .then((data) => {
-          if (data.status === "success") {
-            const timestamp = new Date().getTime();
-            document.getElementById("my-profile-picture").src =
-              data.profile_picture + "?t=" + timestamp;
-            document.getElementById("profile-modal-image").src =
-              data.profile_picture + "?t=" + timestamp;
-          } else {
-            alert("Error al cambiar la foto de perfil.");
+  const inputFile = document.createElement('input');
+  inputFile.type = 'file';
+  inputFile.accept = 'image/*';
+  inputFile.onchange = async function() {
+      const file = inputFile.files[0];
+      if (file) {
+          // Validar el tamaño del archivo (opcional)
+          const maxSize = 5 * 1024 * 1024; // 5 MB
+          if (file.size > maxSize) {
+              alert('El archivo es demasiado grande. Tamaño máximo: 5 MB.');
+              return;
           }
-        })
-        .catch((error) => {
-          console.error("Error al cambiar la foto de perfil:", error);
-        });
-    }
+          // Validar el tipo de archivo
+          const allowedTypes = ['image/png', 'image/jpeg', 'image/gif', 'image/webp'];
+          if (!allowedTypes.includes(file.type)) {
+              alert('Tipo de archivo no permitido. Solo se permiten PNG, JPEG, GIF y WEBP.');
+              return;
+          }
+          // Enviar el archivo al servidor para actualizar la foto de perfil
+          const formData = new FormData();
+          formData.append('profile_picture', file);
+          try {
+              const response = await fetch('/change_profile_picture', {
+                  method: 'POST',
+                  body: formData,
+                  credentials: 'include'
+              });
+              const data = await response.json();
+              if (data.status === 'success') {
+                  const timestamp = new Date().getTime();
+                  document.getElementById('my-profile-picture').src = `${data.profile_picture}?t=${timestamp}`;
+                  document.getElementById('profile-modal-image').src = `${data.profile_picture}?t=${timestamp}`;
+                  // Emitir evento para actualizar la imagen en otros componentes si es necesario
+              } else {
+                  alert('Error al cambiar la foto de perfil.');
+              }
+          } catch (error) {
+              console.error('Error al cambiar la foto de perfil:', error);
+              alert('Hubo un problema al cambiar la foto de perfil.');
+          }
+      }
   };
   // Simular clic en el input file
   inputFile.click();
 }
-
 document
   .querySelector(".settings-button")
   .addEventListener("click", function () {

@@ -173,76 +173,8 @@ def login_user():
         return jsonify({'status': 'Login exitoso.'}), 200
     else:
         return jsonify({'error': 'Credenciales incorrectas.'}), 400
-@app.route('/change_profile_picture', methods=['POST'])
-def change_profile_picture():
-    if 'user_id' not in session:
-        return jsonify({'error': 'No autenticado'}), 401
-    user_id = session['user_id']
-    file = request.files.get('profile_picture')
-    if file and allowed_file(file.filename):
-        # Obtener el nombre completo del usuario
-        conn = get_db_connection()
-        cursor = conn.cursor()
-        cursor.execute('SELECT username, profile_picture FROM users WHERE id = ?', (user_id,))
-        user = cursor.fetchone()
-        if not user:
-            conn.close()
-            return jsonify({'error': 'Usuario no encontrado.'}), 404
-        old_profile_picture = user['profile_picture']
 
-        # Eliminar la foto de perfil anterior si no es la predeterminada
-        if old_profile_picture and old_profile_picture != '/static/img/none.jpg':
-            old_picture_path = old_profile_picture.lstrip('/')
-            if os.path.exists(old_picture_path):
-                os.remove(old_picture_path)
-
-        # Renombrar el archivo al nombre completo del usuario
-        safe_username = secure_filename(user['username'])
-        extension = file.filename.rsplit('.', 1)[1].lower()
-        filename = f"{safe_username}.{extension}"
-        profile_picture_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-        
-        # Guardar el nuevo archivo
-        file.save(profile_picture_path)
-        profile_picture_url = '/' + profile_picture_path.replace('\\', '/')
-
-        # Actualizar la base de datos
-        cursor.execute('UPDATE users SET profile_picture = ? WHERE id = ?', (profile_picture_url, user_id))
-        conn.commit()
-        conn.close()
-
-        return jsonify({'status': 'success', 'profile_picture': profile_picture_url}), 200
-    else:
-        return jsonify({'error': 'No se proporcionó una imagen válida.'}), 400
-    
-# server.py
-
-@app.route('/delete_profile_picture', methods=['POST'])
-def delete_profile_picture():
-    if 'user_id' not in session:
-        return jsonify({'error': 'No autenticado'}), 401
-    user_id = session['user_id']
-
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute('SELECT profile_picture FROM users WHERE id = ?', (user_id,))
-    user = cursor.fetchone()
-    if not user:
-        conn.close()
-        return jsonify({'error': 'Usuario no encontrado.'}), 404
-    profile_picture = user['profile_picture']
-
-    # Eliminar la foto de perfil si no es la predeterminada
-    if profile_picture and profile_picture != '/static/img/none.jpg':
-        picture_path = profile_picture.lstrip('/')
-        if os.path.exists(picture_path):
-            os.remove(picture_path)
-    
-    # Actualizar la base de datos para usar la imagen predeterminada
-    cursor.execute('UPDATE users SET profile_picture = ? WHERE id = ?', ('/static/img/none.jpg', user_id))
-    conn.commit()
-    conn.close()
-    return jsonify({'status': 'success', 'profile_picture': '/static/img/none.jpg'}), 200
+ 
 
 # Ruta para cerrar sesión
 @app.route('/logout', methods=['GET'])
@@ -643,6 +575,116 @@ def get_chat_id():
         chat_id = chat['chat_id']
     conn.close()
     return jsonify({'chat_id': chat_id}), 200
+def notify_profile_picture_update(socketio, user_id, new_profile_picture_url):
+    """
+    Notifica a todos los contactos del usuario que ha actualizado su foto de perfil.
+    """
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    # Obtener todos los contactos del usuario
+    cursor.execute('''
+        SELECT DISTINCT user1_id AS contact_id FROM chats WHERE user2_id = ?
+        UNION
+        SELECT DISTINCT user2_id AS contact_id FROM chats WHERE user1_id = ?
+    ''', (user_id, user_id))
+    contacts = cursor.fetchall()
+    conn.close()
+    for contact in contacts:
+        contact_id = contact['contact_id']
+        data = {
+            'user_id': user_id,
+            'new_profile_picture_url': new_profile_picture_url
+        }
+        # Emitir el evento a la sala del contacto
+        socketio.emit('profile_picture_update', data, room=f'user_{contact_id}')
+# Ruta para cambiar la foto de perfil (POST)
+@app.route('/change_profile_picture', methods=['POST'])
+def change_profile_picture():
+    try:
+        if 'user_id' not in session:
+            print("Usuario no autenticado.")
+            return jsonify({'error': 'No autenticado'}), 401
+        user_id = session['user_id']
+        file = request.files.get('profile_picture')
+        if file and allowed_file(file.filename):
+            print(f"Archivo recibido: {file.filename}")
+            conn = get_db_connection()
+            cursor = conn.cursor()
+            cursor.execute('SELECT username, profile_picture FROM users WHERE id = ?', (user_id,))
+            user = cursor.fetchone()
+            if not user:
+                print(f"Usuario con ID {user_id} no encontrado.")
+                conn.close()
+                return jsonify({'error': 'Usuario no encontrado.'}), 404
+            old_profile_picture = user['profile_picture']
+            print(f"Foto de perfil anterior: {old_profile_picture}")
+
+            # Eliminar la foto de perfil anterior si no es la predeterminada
+            if old_profile_picture and old_profile_picture != '/static/img/default_profile.png':
+                old_picture_path = os.path.join(app.root_path, 'static', 'uploads', os.path.basename(old_profile_picture))
+                print(f"Intentando eliminar la foto de perfil anterior en: {old_picture_path}")
+                if os.path.exists(old_picture_path):
+                    try:
+                        os.remove(old_picture_path)
+                        print(f"Eliminado {old_picture_path}")
+                    except Exception as e:
+                        print(f"Error al eliminar {old_picture_path}: {e}")
+
+            # Renombrar el archivo al nombre completo del usuario
+            safe_username = secure_filename(user['username'])
+            extension = file.filename.rsplit('.', 1)[1].lower()
+            filename = f"{safe_username}.{extension}"
+            profile_picture_path = os.path.join(app.root_path, 'static', 'uploads', filename)
+            print(f"Guardando la nueva foto de perfil en: {profile_picture_path}")
+
+            # Guardar el nuevo archivo
+            file.save(profile_picture_path)
+            profile_picture_url = f"/static/uploads/{filename}"
+            print(f"Foto de perfil actualizada a: {profile_picture_url}")
+
+            # Actualizar la base de datos
+            cursor.execute('UPDATE users SET profile_picture = ? WHERE id = ?', (profile_picture_url, user_id))
+            conn.commit()
+            conn.close()
+
+            # Notificar a los contactos sobre la actualización de la foto de perfil
+            notify_profile_picture_update(socketio, user_id, profile_picture_url)
+
+            return jsonify({'status': 'success', 'profile_picture': profile_picture_url}), 200
+        else:
+            print("No se proporcionó una imagen válida.")
+            return jsonify({'error': 'No se proporcionó una imagen válida.'}), 400
+    except Exception as e:
+        print(f"Error en change_profile_picture: {e}")
+        return jsonify({'error': 'Error interno del servidor.'}), 500
+
+# Ruta para eliminar la foto de perfil (POST)
+@app.route('/delete_profile_picture', methods=['POST'])
+def delete_profile_picture():
+    if 'user_id' not in session:
+        return jsonify({'error': 'No autenticado'}), 401
+    user_id = session['user_id']
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute('SELECT profile_picture FROM users WHERE id = ?', (user_id,))
+    user = cursor.fetchone()
+    if not user:
+        conn.close()
+        return jsonify({'error': 'Usuario no encontrado.'}), 404
+    profile_picture = user['profile_picture']
+
+    # Eliminar la foto de perfil si no es la predeterminada
+    if profile_picture and profile_picture != '/static/img/none.jpg':
+        picture_path = os.path.join(app.root_path, '../../', profile_picture.lstrip('/'))
+        if os.path.exists(picture_path):
+            os.remove(picture_path)
+    
+    # Actualizar la base de datos para usar la imagen predeterminada
+    cursor.execute('UPDATE users SET profile_picture = ? WHERE id = ?', ('/static/img/default_profile.png', user_id))
+    conn.commit()
+    conn.close()
+    return jsonify({'status': 'success', 'profile_picture': '/static/img/default_profile.png'}), 200
 
 
 if __name__ == '__main__':
